@@ -1,0 +1,2450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SYDE 572 &middot; Assignment 1</title>
+<meta name="description" content="SYDE 572 Assignment 1: shortest distance from a point to a function, and least-squares fitting of a line and a parabola.">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+  MathJax = { tex: { inlineMath: [['\\(', '\\)']], displayMath: [['\\[', '\\]']] },
+              options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'] } };
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+:root { --bg:#f7f6f3; --paper:#fff; --ink:#15140f; --ink2:#55544f; --line:#e3e1d9; --accent:#1f4e79; --code:#f6f8fa; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#121211; --paper:#1a1a19; --ink:#f2f1ec; --ink2:#c3c2b7; --line:#2d2c29; --accent:#6ba4dd; --code:#20201e; }
+}
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); overflow-x:clip;
+  font:16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+a { color:var(--accent); }
+header.top { background:var(--accent); color:#fff; padding:34px 20px 30px; }
+header.top .in { max-width:1120px; margin:0 auto; }
+header.top .eyebrow { font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; opacity:.85; font-weight:600; }
+header.top h1 { font-size:clamp(1.5rem,3.4vw,2.2rem); margin:.3rem 0 .5rem; }
+header.top p { margin:0; opacity:.92; max-width:70ch; }
+header.top .links { margin-top:16px; display:flex; flex-wrap:wrap; gap:10px; }
+header.top .links a { background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.35); color:#fff;
+  padding:7px 14px; border-radius:7px; text-decoration:none; font-size:.9rem; }
+.layout { max-width:1120px; margin:0 auto; padding:0 20px 70px; display:grid;
+  grid-template-columns:230px minmax(0,1fr); gap:38px; }
+#toc { position:sticky; top:20px; align-self:start; margin-top:28px; font-size:.87rem; max-height:90vh; overflow:auto; }
+#toc ul { list-style:none; margin:0; padding:0 0 0 2px; }
+#toc ul ul { padding-left:12px; }
+#toc li { margin:2px 0; }
+#toc a { display:block; color:var(--ink2); text-decoration:none; padding:3px 8px; border-left:2px solid var(--line); }
+#toc a:hover { color:var(--accent); border-left-color:var(--accent); }
+main { min-width:0; padding-top:28px; }
+h1, h2, h3 { line-height:1.25; }
+main h1 { font-size:1.6rem; margin:2.2rem 0 .6rem; padding-bottom:.35rem; border-bottom:2px solid var(--line); }
+main h2 { font-size:1.22rem; margin:1.8rem 0 .5rem; }
+main h3 { font-size:1.02rem; margin:1.3rem 0 .4rem; }
+p { margin:.7rem 0; }
+.box { border-left:4px solid var(--accent); background:var(--paper); border-radius:0 8px 8px 0;
+  padding:12px 16px; margin:16px 0; }
+.box.answer { border-left-color:#1baf7a; }
+figure { margin:22px 0; text-align:center; }
+figure img { max-width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
+figcaption { font-size:.87rem; color:var(--ink2); margin-top:7px; text-align:left; }
+.tbl { overflow-x:auto; margin:14px 0; border:1px solid var(--line); border-radius:8px; background:var(--paper); }
+table { border-collapse:collapse; width:100%; font-size:.86rem; }
+th, td { padding:6px 10px; text-align:right; border-bottom:1px solid var(--line); white-space:nowrap; }
+th { background:var(--code); font-weight:600; font-size:.8rem; color:var(--ink2); }
+tr:last-child td { border-bottom:0; }
+pre { background:var(--code); border:1px solid var(--line); border-radius:8px; overflow-x:auto; margin:14px 0; }
+pre code { display:block; padding:14px 16px; font-size:.78rem; line-height:1.5;
+  font-family:ui-monospace, SFMono-Regular, Consolas, monospace; }
+code { font-family:ui-monospace, SFMono-Regular, Consolas, monospace; font-size:.88em; }
+mjx-container { max-width:100%; overflow-x:auto; overflow-y:hidden; }
+mjx-container:not([display="true"]) { display:inline-block; vertical-align:-0.25em; }
+mjx-container[display="true"] { padding:2px 0; }
+footer { border-top:1px solid var(--line); margin-top:40px; padding:18px 0 0; color:var(--ink2); font-size:.87rem; }
+@media (max-width:900px) { .layout { grid-template-columns:1fr; } #toc { display:none; } }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="eyebrow">SYDE 572 &middot; Assignment 1</div>
+  <h1>Shortest distance to a function; fitting a line and a parabola</h1>
+  <p>Analytical, Newton&ndash;Raphson and golden-section solutions, with the code and the
+     intermediate-step plots. This page is generated from the same LaTeX source as the PDF.</p>
+  <div class="links">
+    <a href="../index.html">&larr; Portfolio</a>
+    <a href="SYDE572_A1_solution.pdf">Download PDF</a>
+    <a href="code/distance.py">distance.py</a>
+    <a href="code/fitting.py">fitting.py</a>
+  </div>
+</div></header>
+<div class="layout">
+<nav id="toc">
+<ul>
+<li><a href="#shortest-distance-from-a-point-to-a-function" id="toc-shortest-distance-from-a-point-to-a-function">Shortest distance from a point to a function</a>
+<ul>
+<li><a href="#objective-function" id="toc-objective-function">Objective function</a></li>
+<li><a href="#analytical-solution" id="toc-analytical-solution">Analytical solution</a></li>
+<li><a href="#numerical-method-a-newtonraphson" id="toc-numerical-method-a-newtonraphson">Numerical method A: Newton–Raphson</a></li>
+<li><a href="#numerical-method-b-golden-section-search" id="toc-numerical-method-b-golden-section-search">Numerical method B: golden section search</a></li>
+<li><a href="#results-for-the-assigned-points" id="toc-results-for-the-assigned-points">Results for the assigned points</a></li>
+<li><a href="#python-implementation" id="toc-python-implementation">Python implementation</a></li>
+<li><a href="#other-parabolas-and-non-polynomial-functions" id="toc-other-parabolas-and-non-polynomial-functions">Other parabolas and non-polynomial functions</a></li>
+</ul></li>
+<li><a href="#fitting-a-line-and-a-parabola" id="toc-fitting-a-line-and-a-parabola">Fitting a line and a parabola</a>
+<ul>
+<li><a href="#setting-up-the-mse" id="toc-setting-up-the-mse">Setting up the MSE</a></li>
+<li><a href="#analytical-solution-1" id="toc-analytical-solution-1">Analytical solution</a></li>
+<li><a href="#numerical-solution-newtonraphson-one-parameter-per-step" id="toc-numerical-solution-newtonraphson-one-parameter-per-step">Numerical solution: Newton–Raphson, one parameter per step</a></li>
+<li><a href="#results" id="toc-results">Results</a></li>
+<li><a href="#python-implementation-1" id="toc-python-implementation-1">Python implementation</a></li>
+</ul></li>
+<li><a href="#app:plots" id="toc-app:plots">Intermediate-step plots for the remaining points</a></li>
+<li><a href="#app:distance" id="toc-app:distance"><code>distance.py</code> — Part 1 code</a></li>
+<li><a href="#app:fitting" id="toc-app:fitting"><code>fitting.py</code> — Part 2 code</a></li>
+</ul>
+</nav>
+<main>
+<div class="center">
+<p>Project webpage: <a href="https://TodoroO-O.github.io/1/" class="uri">https://TodoroO-O.github.io/1/</a></p>
+</div>
+<hr />
+<hr />
+<section id="shortest-distance-from-a-point-to-a-function" class="level1">
+<h1>Shortest distance from a point to a function</h1>
+<div class="box problem">
+<p><strong>Problem.</strong> Solve analytically and with two numerical approaches (Newton–Raphson, golden
+section search) for the shortest distance from <span class="math inline">\((0,0)\)</span>, <span class="math inline">\((-4,0)\)</span>, <span class="math inline">\((-8,0)\)</span>, <span class="math inline">\((2,0)\)</span>, <span class="math inline">\((6,0)\)</span> to
+<span class="math inline">\(y=x^{2}+5\)</span>. Code the numerical methods for any point and any parabola, demonstrate them on other
+functions and points, extend them to non-polynomial functions, and plot the intermediate steps.</p>
+</div>
+<section id="objective-function" class="level2">
+<h2>Objective function</h2>
+<p>The distance from <span class="math inline">\((x_0,y_0)\)</span> to a point <span class="math inline">\((x,f(x))\)</span> on the curve is
+<span class="math display">\[d(x)=\sqrt{(x-x_0)^{2}+\bigl(f(x)-y_0\bigr)^{2}} .\]</span>
+The square root is monotonically increasing, so the minimiser of <span class="math inline">\(d\)</span> also minimises the squared
+distance, which is what every method below works with:
+<span class="math display">\[\begin{aligned}
+  D(x)   &amp;= (x-x_0)^{2}+\bigl(f(x)-y_0\bigr)^{2},\\
+  D&#39;(x)  &amp;= 2(x-x_0)+2\bigl(f(x)-y_0\bigr)f&#39;(x),
+  \label{eq:Dprime}\\
+  D&#39;&#39;(x) &amp;= 2+2f&#39;(x)^{2}+2\bigl(f(x)-y_0\bigr)f&#39;&#39;(x).
+\end{aligned}\]</span>
+Setting <span class="math inline">\(D&#39;(x)=0\)</span> gives
+<span class="math display">\[(x-x_0)+\bigl(f(x)-y_0\bigr)f&#39;(x)=0
+  \;\Longleftrightarrow\;
+  \bigl(x-x_0,\ f(x)-y_0\bigr)\cdot\bigl(1,\ f&#39;(x)\bigr)=0 ,\]</span>
+so the segment from the point to the curve is perpendicular to the tangent at the closest point.</p>
+<p>For <span class="math inline">\(f(x)=x^{2}+5\)</span> (hence <span class="math inline">\(f&#39;=2x\)</span>, <span class="math inline">\(f&#39;&#39;=2\)</span>) with <span class="math inline">\(y_0=0\)</span>:
+<span class="math display">\[D(x)=(x-x_0)^{2}+(x^{2}+5)^{2},\qquad
+  D&#39;(x)=4x^{3}+22x-2x_0,\qquad
+  D&#39;&#39;(x)=12x^{2}+22 .
+  \label{eq:ourD}\]</span>
+<span class="math inline">\(D&#39;&#39;(x)&gt;0\)</span> everywhere, so <span class="math inline">\(D\)</span> is strictly convex: one stationary point, and it is the global
+minimum. All three methods must therefore agree.</p>
+</section>
+<section id="analytical-solution" class="level2">
+<h2>Analytical solution</h2>
+<p>Dividing <span class="math inline">\(D&#39;(x)=0\)</span> by 4 gives the depressed cubic
+<span class="math display">\[x^{3}+px+q=0,\qquad p=\tfrac{11}{2},\qquad q=-\tfrac{x_0}{2},\]</span>
+whose discriminant
+<span class="math display">\[\Delta=\Bigl(\frac q2\Bigr)^{2}+\Bigl(\frac p3\Bigr)^{3}
+        =\frac{x_0^{2}}{16}+\frac{1331}{216},
+  \qquad \frac{1331}{216}=\Bigl(\frac{11}{6}\Bigr)^{3}=6.162037 ,\]</span>
+is positive for every <span class="math inline">\(x_0\)</span>. Exactly one real root exists, given by Cardano’s formula:
+<span class="math display">\[x^{\ast}=u+v,\quad
+  u=\sqrt[3]{\frac{x_0}{4}+\sqrt{\Delta}},\quad
+  v=\sqrt[3]{\frac{x_0}{4}-\sqrt{\Delta}},\quad
+  d=\sqrt{(x^{\ast}-x_0)^{2}+\bigl((x^{\ast})^{2}+5\bigr)^{2}} .
+  \label{eq:cardano}\]</span></p>
+<section id="worked-in-full-the-point--40." class="level4">
+<h4>Worked in full: the point <span class="math inline">\((-4,0)\)</span>.</h4>
+<p><span class="math display">\[\begin{aligned}
+  \frac{x_0}{4}&amp;=-1, \qquad \sqrt{\Delta}=\sqrt{1+6.162037}=2.676198,\\
+  u&amp;=\sqrt[3]{-1+2.676198}=\sqrt[3]{1.676198}=1.187887,\\
+  v&amp;=\sqrt[3]{-1-2.676198}=\sqrt[3]{-3.676198}=-1.543357,\\
+  x^{\ast}&amp;=1.187887-1.543357=-0.355470,\qquad y^{\ast}=(-0.355470)^{2}+5=5.126359,\\
+  d&amp;=\sqrt{(-0.355470+4)^{2}+(5.126359)^{2}}=\sqrt{13.282599+26.279556}=\sqrt{39.562155}
+   =\mathbf{6.289845}.
+\end{aligned}\]</span>
+Check in <span class="math inline">\(\eqref{eq:ourD}\)</span>: <span class="math inline">\(4(-0.355470)^{3}+22(-0.355470)+8=-0.179668-7.820340+8\approx0\)</span>.</p>
+</section>
+<section id="all-five-points." class="level4">
+<h4>All five points.</h4>
+<p>Each row applies <span class="math inline">\(\eqref{eq:cardano}\)</span> in the same three steps.</p>
+<div class="tbl"><table>
+<caption>Analytical solution for <span class="math inline">\(y=x^{2}+5\)</span>.</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><span class="math inline">\((x_0,y_0)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_0/4\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(\sqrt{\Delta}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(u\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(v\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x^\ast=u+v\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(y^\ast\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(D(x^\ast)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(d\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((0,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.00\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.482345\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.354006\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1.354006\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(25.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{5.000000}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((-4,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1.00\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.676198\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.187887\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1.543357\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.355470\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.126359\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(39.562155\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{6.289845}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((-8,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-2.00\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(3.187795\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.059044\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1.731122\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.672078\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.451689\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(83.419352\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{9.133420}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((2,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.50\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.532200\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.447391\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1.266647\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.180745\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.032669\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(28.637444\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{5.351396}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((6,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.50\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.900351\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.638686\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1.118782\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.519904\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.270300\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(57.807516\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{7.603125}\)</span></td>
+</tr>
+</tbody>
+</table></div>
+<p>For <span class="math inline">\((0,0)\)</span> the cube roots cancel (<span class="math inline">\(u=-v\)</span>), so <span class="math inline">\(x^{\ast}=0\)</span> and the closest point is the vertex <span class="math inline">\((0,5)\)</span>.</p>
+<figure>
+<img src="media/p1_overview.png" style="width:75.0%" />
+<figcaption>The five points, their closest points on <span class="math inline">\(y=x^{2}+5\)</span> and the shortest segments. Axes are
+equally scaled, so the right angles are visible.</figcaption>
+</figure>
+</section>
+</section>
+<section id="numerical-method-a-newtonraphson" class="level2">
+<h2>Numerical method A: Newton–Raphson</h2>
+<p>Newton’s method is applied to the root of <span class="math inline">\(D&#39;\)</span>:
+<span class="math display">\[x_{k+1}=x_k-\frac{D&#39;(x_k)}{D&#39;&#39;(x_k)}
+         =x_k-\frac{2(x_k-x_0)+2(f(x_k)-y_0)f&#39;(x_k)}
+                   {2+2f&#39;(x_k)^{2}+2(f(x_k)-y_0)f&#39;&#39;(x_k)} ,
+  \label{eq:newton}\]</span>
+which for <span class="math inline">\(f(x)=x^{2}+5\)</span>, <span class="math inline">\(y_0=0\)</span> simplifies to
+<span class="math display">\[x_{k+1}=x_k-\frac{4x_k^{3}+22x_k-2x_0}{12x_k^{2}+22}
+         =\frac{8x_k^{3}+2x_0}{12x_k^{2}+22}
+         =\boxed{\;\frac{4x_k^{3}+x_0}{6x_k^{2}+11}\;}
+  \label{eq:newtonours}\]</span>
+Every run starts at <span class="math inline">\(x^{(0)}=0\)</span> with tolerance <span class="math inline">\(10^{-7}\)</span>, so the first step is always <span class="math inline">\(x_1=x_0/11\)</span>.</p>
+<section id="worked-in-full-the-point--40.-1" class="level4">
+<h4>Worked in full: the point <span class="math inline">\((-4,0)\)</span>.</h4>
+<p><span class="math display">\[\begin{aligned}
+  x_1&amp;=\frac{4(0)^{3}-4}{6(0)^{2}+11}=\frac{-4}{11}=-0.3636364,\\
+  x_2&amp;=\frac{4(-0.3636364)^{3}-4}{6(-0.3636364)^{2}+11}
+      =\frac{-0.1923366-4}{11.7933884}=-0.3554819,\\
+  x_3&amp;=\frac{4(-0.3554819)^{3}-4}{6(-0.3554819)^{2}+11}
+      =\frac{-0.1796676-4}{11.7581771}=-0.3554697,\\
+  x_4&amp;=-0.3554697 \quad\Rightarrow\quad |x_4-x_3|&lt;10^{-7},\ \text{stop},
+\end{aligned}\]</span>
+giving <span class="math inline">\(d=6.289845\)</span>. The number of correct digits roughly doubles per step (<span class="math inline">\(2\to5\to10\)</span>):
+quadratic convergence.</p>
+<div class="tbl"><table>
+<caption>Newton–Raphson for the point <span class="math inline">\((-4,0)\)</span>, all quantities from <span class="math inline">\(\eqref{eq:ourD}\)</span>.</caption>
+<thead>
+<tr>
+<th style="text-align: center;"><span class="math inline">\(k\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_k\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(D(x_k)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(D&#39;(x_k)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(D&#39;&#39;(x_k)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_{k+1}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(|x_{k+1}-x_k|\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: right;"><span class="math inline">\(0.0000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(41.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(8.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(22.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3636364\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(3.64\times 10^{-1}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: right;"><span class="math inline">\(-0.3636364\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(39.562940\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.192337\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(23.586777\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554819\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(8.15\times 10^{-3}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554819\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(39.562155\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.000288\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(23.516409\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554697\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.22\times 10^{-5}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554697\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(39.562155\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(23.516304\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554697\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.72\times 10^{-11}\)</span></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<caption>Newton iterates for all five points, from the guess <span class="math inline">\(x=0\)</span>. Bold entries are converged.
+<span class="math inline">\((0,0)\)</span> needs no iteration because <span class="math inline">\(D&#39;(0)=0\)</span>.</caption>
+<tbody>
+<tr>
+<td style="text-align: center;"></td>
+<td colspan="5" style="text-align: center;"><span class="math inline">\(x_k\)</span> for the query point <span class="math inline">\((x_0,y_0)\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><span class="math inline">\(k\)</span></td>
+<td style="text-align: right;"><span class="math inline">\((0,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\((-4,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\((-8,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\((2,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\((6,0)\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: right;"><span class="math inline">\(0.0000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.0000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.0000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.0000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.0000000\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{0.0000000}\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3636364\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.7272727\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.1818182\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5454545\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554819\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.6729923\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.1807447\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5200682\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554697\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.6720784\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.1807446\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5199037\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{-0.3554697}\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.6720781\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{0.1807446}\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{0.5199037}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><span class="math inline">\(\mathbf{-0.6720781}\)</span></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+</tr>
+</tbody>
+</table></div>
+<figure>
+<p><img src="media/p1_newton_-4_0.png" alt="image" /><br />
+<img src="media/p1_newton_-8_0.png" alt="image" /></p>
+<figcaption>Newton–Raphson intermediate steps for <span class="math inline">\((-4,0)\)</span> and <span class="math inline">\((-8,0)\)</span>. (a) The iterates on the
+curve, light <span class="math inline">\(\to\)</span> dark. (b) Each tangent to <span class="math inline">\(D&#39;\)</span> followed to its zero crossing gives the next
+iterate. (c) Error on a log scale. The other three points are in the appendix.</figcaption>
+</figure>
+</section>
+</section>
+<section id="numerical-method-b-golden-section-search" class="level2">
+<h2>Numerical method B: golden section search</h2>
+<p>The bracket <span class="math inline">\([a,b]\)</span> carries two interior probes,
+<span class="math display">\[x_1=a+r(b-a),\qquad x_2=b-r(b-a),\qquad
+  r=2-\varphi=\frac{3-\sqrt5}{2}=0.381966,\quad \varphi=1.618034 .\]</span>
+If <span class="math inline">\(D(x_1)&lt;D(x_2)\)</span> the minimum of a unimodal <span class="math inline">\(D\)</span> cannot lie in <span class="math inline">\((x_2,b]\)</span>, so <span class="math inline">\(b\leftarrow x_2\)</span>;
+otherwise <span class="math inline">\(a\leftarrow x_1\)</span>. The golden ratio places the surviving probe exactly where the new
+bracket needs one, so each iteration costs one new evaluation of <span class="math inline">\(D\)</span> and shrinks the bracket by
+<span class="math inline">\(1/\varphi=0.618034\)</span>. No derivatives are used. Starting from <span class="math inline">\([-10,10]\)</span> with tolerance <span class="math inline">\(10^{-7}\)</span>,
+<span class="math display">\[20\,\varphi^{-n}&lt;10^{-7}
+  \;\Longrightarrow\;
+  n&gt;\frac{\ln(20/10^{-7})}{\ln 1.618034}=\frac{19.1138}{0.4812}=39.72
+  \;\Longrightarrow\; n=40
+  \label{eq:goldeniters}\]</span>
+iterations for every point.</p>
+<section id="worked-in-full-the-point--40.-2" class="level4">
+<h4>Worked in full: the point <span class="math inline">\((-4,0)\)</span>.</h4>
+<p>At <span class="math inline">\(x=\pm2.3607\)</span>, <span class="math inline">\(x^{2}+5=10.5729\)</span>, so
+<span class="math display">\[\begin{aligned}
+  x_1&amp;=-10+0.381966(20)=-2.3607, \qquad x_2=10-0.381966(20)=2.3607,\\
+  D(x_1)&amp;=(-2.3607+4)^{2}+(10.5729)^{2}=(1.6393)^{2}+111.786=114.47,\\
+  D(x_2)&amp;=(2.3607+4)^{2}+(10.5729)^{2}=(6.3607)^{2}+111.786=152.24 .
+\end{aligned}\]</span>
+Since <span class="math inline">\(114.47&lt;152.24\)</span>, <span class="math inline">\(b\leftarrow x_2\)</span> and the bracket becomes <span class="math inline">\([-10,\ 2.3607]\)</span>. The old <span class="math inline">\(x_1\)</span>
+becomes the new <span class="math inline">\(x_2\)</span>, so only <span class="math inline">\(x_1=-10+0.381966(12.3607)=-5.2786\)</span> is evaluated, with
+<span class="math inline">\(D=1081.68\)</span>. Continuing:</p>
+<div class="tabular">
+<p><span>crrrrrrcr</span>
+<span class="math inline">\(k\)</span> &amp; <span class="math inline">\(a\)</span> &amp; <span class="math inline">\(b\)</span> &amp; <span class="math inline">\(x_1\)</span> &amp; <span class="math inline">\(x_2\)</span> &amp; <span class="math inline">\(D(x_1)\)</span> &amp; <span class="math inline">\(D(x_2)\)</span> &amp; update &amp; <span class="math inline">\(b-a\)</span><br />
+&amp; <span class="math inline">\(-10.0000\)</span> &amp; <span class="math inline">\(10.0000\)</span> &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(114.4717\)</span> &amp; <span class="math inline">\(152.2425\)</span> &amp; <span class="math inline">\(b\leftarrow x_2\)</span> &amp; <span class="math inline">\(20.0000\)</span><br />
+1 &amp; <span class="math inline">\(-10.0000\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(-5.2786\)</span> &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(1081.6804\)</span> &amp; <span class="math inline">\(114.4717\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(12.3607\)</span><br />
+2 &amp; <span class="math inline">\(-5.2786\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(114.4717\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(7.6393\)</span><br />
+3 &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(0.5573\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(48.9709\)</span> &amp; <span class="math inline">\(b\leftarrow x_2\)</span> &amp; <span class="math inline">\(4.7214\)</span><br />
+4 &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(0.5573\)</span> &amp; <span class="math inline">\(-1.2461\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(50.5232\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(2.9180\)</span><br />
+5 &amp; <span class="math inline">\(-1.2461\)</span> &amp; <span class="math inline">\(0.5573\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(-0.1316\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(40.1382\)</span> &amp; <span class="math inline">\(b\leftarrow x_2\)</span> &amp; <span class="math inline">\(1.8034\)</span><br />
+6 &amp; <span class="math inline">\(-1.2461\)</span> &amp; <span class="math inline">\(-0.1316\)</span> &amp; <span class="math inline">\(-0.8204\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(42.2933\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(1.1146\)</span><br />
+7 &amp; <span class="math inline">\(-0.8204\)</span> &amp; <span class="math inline">\(-0.1316\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(-0.3947\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(39.5803\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(0.6888\)</span><br />
+<br />
+40 &amp; <span class="math inline">\(-0.3554697\)</span> &amp; <span class="math inline">\(-0.3554696\)</span> &amp; &amp; &amp; <span class="math inline">\(8.74\times 10^{-8}\)</span><br />
+</p>
+</div>
+<p>The first probes are always <span class="math inline">\(\mp2.3607\)</span>, so for the other points only <span class="math inline">\((x-x_0)^{2}\)</span> changes. The
+pair <span class="math inline">\(\bigl(D(-2.3607),\,D(2.3607)\bigr)\)</span> is <span class="math inline">\((117.36,\,117.36)\)</span> for <span class="math inline">\((0,0)\)</span>;
+<span class="math inline">\((143.59,\,219.13)\)</span> for <span class="math inline">\((-8,0)\)</span>; <span class="math inline">\((130.80,\,111.91)\)</span> for <span class="math inline">\((2,0)\)</span>; and <span class="math inline">\((181.69,\,125.03)\)</span> for
+<span class="math inline">\((6,0)\)</span>. Each case takes 40 iterations.</p>
+<figure>
+<img src="media/p1_golden_-4_0.png" />
+<figcaption>Golden section intermediate steps for <span class="math inline">\((-4,0)\)</span>. (a) Probe pairs on <span class="math inline">\(D(x)\)</span>. (b) The bracket
+for the first 12 iterations, white dots marking the probes. (c) Bracket width and midpoint error,
+both decaying by the factor <span class="math inline">\(0.618\)</span> of <span class="math inline">\(\eqref{eq:goldeniters}\)</span>.</figcaption>
+</figure>
+</section>
+</section>
+<section id="results-for-the-assigned-points" class="level2">
+<h2>Results for the assigned points</h2>
+<div class="tbl"><table>
+<caption>The three methods agree to at least six decimal places.</caption>
+<tbody>
+<tr>
+<td style="text-align: left;"></td>
+<td colspan="2" style="text-align: center;">Analytical</td>
+<td colspan="2" style="text-align: center;">Newton–Raphson</td>
+<td colspan="2" style="text-align: center;">Golden section</td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((x_0,y_0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(x^\ast\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(d\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(d\)</span></td>
+<td style="text-align: center;">iters</td>
+<td style="text-align: right;"><span class="math inline">\(d\)</span></td>
+<td style="text-align: center;">iters</td>
+<td style="text-align: right;"><span class="math inline">\(\max|\Delta d|\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((0,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.000000\)</span></td>
+<td style="text-align: center;">1</td>
+<td style="text-align: right;"><span class="math inline">\(5.000000\)</span></td>
+<td style="text-align: center;">40</td>
+<td style="text-align: right;"><span class="math inline">\(8.9\times 10^{-16}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((-4,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.355470\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(6.289845\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(6.289845\)</span></td>
+<td style="text-align: center;">4</td>
+<td style="text-align: right;"><span class="math inline">\(6.289845\)</span></td>
+<td style="text-align: center;">40</td>
+<td style="text-align: right;"><span class="math inline">\(1.8\times 10^{-15}\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((-8,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.672078\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(9.133420\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(9.133420\)</span></td>
+<td style="text-align: center;">5</td>
+<td style="text-align: right;"><span class="math inline">\(9.133420\)</span></td>
+<td style="text-align: center;">40</td>
+<td style="text-align: right;"><span class="math inline">\(0\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((2,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.180745\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.351396\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(5.351396\)</span></td>
+<td style="text-align: center;">4</td>
+<td style="text-align: right;"><span class="math inline">\(5.351396\)</span></td>
+<td style="text-align: center;">40</td>
+<td style="text-align: right;"><span class="math inline">\(0\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\((6,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.519904\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(7.603125\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(7.603125\)</span></td>
+<td style="text-align: center;">4</td>
+<td style="text-align: right;"><span class="math inline">\(7.603125\)</span></td>
+<td style="text-align: center;">40</td>
+<td style="text-align: right;"><span class="math inline">\(8.9\times 10^{-16}\)</span></td>
+</tr>
+</tbody>
+</table></div>
+<div class="box answer">
+<p><span class="math inline">\(d(0,0)=5.000000\)</span> at <span class="math inline">\(x^{\ast}=0\)</span>;
+<span class="math inline">\(d(-4,0)=6.289845\)</span> at <span class="math inline">\(x^{\ast}=-0.355470\)</span>;
+<span class="math inline">\(d(-8,0)=9.133420\)</span> at <span class="math inline">\(x^{\ast}=-0.672078\)</span>;
+<span class="math inline">\(d(2,0)=5.351396\)</span> at <span class="math inline">\(x^{\ast}=0.180745\)</span>;
+<span class="math inline">\(d(6,0)=7.603125\)</span> at <span class="math inline">\(x^{\ast}=0.519904\)</span>.</p>
+</div>
+<figure>
+<img src="media/p1_convergence.png" />
+<figcaption>Error per iteration. Newton (left) converges quadratically; golden section (right)
+linearly, with slope <span class="math inline">\(\log_{10}0.618\)</span> per iteration.</figcaption>
+</figure>
+</section>
+<section id="python-implementation" class="level2">
+<h2>Python implementation</h2>
+<p><code>distance.py</code> (the Part 1 listing below) implements both numerical methods for any point
+and any curve:</p>
+<ul>
+<li><p><code>analytical_parabola(x0, y0, a, b, c)</code> — for <span class="math inline">\(y=ax^{2}+bx+c\)</span>, condition
+<span class="math inline">\(\eqref{eq:Dprime}\)</span> expands to the cubic
+<span class="math display">\[2a^{2}x^{3}+3abx^{2}+\bigl(b^{2}+2a(c-y_0)+1\bigr)x+\bigl(b(c-y_0)-x_0\bigr)=0 ,
+    \label{eq:generalcubic}\]</span>
+solved by a hand-written Cardano solver; the real root with the smallest <span class="math inline">\(D\)</span> is returned.</p></li>
+<li><p><code>newton_distance(...)</code> — equation <span class="math inline">\(\eqref{eq:newton}\)</span>. If <code>df</code>/<code>ddf</code> are
+omitted, central differences are used; <code>domain=(lo,hi)</code> clips iterates into the domain of
+<span class="math inline">\(f\)</span>. Every step is recorded, which is what the step plots draw.</p></li>
+<li><p><code>golden_section(...)</code> — the bracket method, recording every bracket.</p></li>
+<li><p><code>distance_to_parabola(...)</code> and <code>distance_to_curve(...)</code> — run all methods
+on any point and any parabola, or on any <span class="math inline">\(f\)</span> without derivatives.</p></li>
+</ul>
+<pre data-numbers="none"><code>&gt;&gt;&gt; from distance import distance_to_parabola
+&gt;&gt;&gt; distance_to_parabola(-4, 0, a=1, b=0, c=5)
+{&#39;analytical&#39;: (6.289845364298704, -0.35546969287483443),
+ &#39;newton&#39;:     (6.289845364298704, -0.3554696928748345, 4),   # (d, x*, iterations)
+ &#39;golden&#39;:     (6.2898453642987056, -0.3554696829624632, 40)}</code></pre>
+</section>
+<section id="other-parabolas-and-non-polynomial-functions" class="level2">
+<h2>Other parabolas and non-polynomial functions</h2>
+<p>The same routines were applied to two further parabolas and to exponential, logarithmic, radical,
+rational (variable in the denominator) and cube-root functions. Each result is checked against a
+brute-force search over 400,001 grid points, and the parabolas also against <span class="math inline">\(\eqref{eq:generalcubic}\)</span>.</p>
+<div class="tbl"><table>
+<caption>Other curves and points. All methods agree; <span class="math inline">\(d\)</span> (grid) is the brute-force reference.</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><span class="math inline">\(y=f(x)\)</span></th>
+<th style="text-align: left;">type</th>
+<th style="text-align: center;"><span class="math inline">\((x_0,y_0)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x^\ast\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(d\)</span> (Newton)</th>
+<th style="text-align: center;">iters</th>
+<th style="text-align: right;"><span class="math inline">\(d\)</span> (golden)</th>
+<th style="text-align: right;"><span class="math inline">\(d\)</span> (grid)</th>
+<th style="text-align: right;"><span class="math inline">\(d\)</span> (exact)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=\tfrac12x^2-2x+1\)</span></td>
+<td style="text-align: left;">parabola</td>
+<td style="text-align: center;"><span class="math inline">\((5,-2)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(3.134728\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.486228\)</span></td>
+<td style="text-align: center;">10</td>
+<td style="text-align: right;"><span class="math inline">\(2.486228\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.486228\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.486228\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=-x^2+4x-1\)</span></td>
+<td style="text-align: left;">parabola</td>
+<td style="text-align: center;"><span class="math inline">\((-1,4)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.264861\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.739072\)</span></td>
+<td style="text-align: center;">9</td>
+<td style="text-align: right;"><span class="math inline">\(2.739072\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.739072\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.739072\)</span></td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=e^{x}\)</span></td>
+<td style="text-align: left;">exponential</td>
+<td style="text-align: center;"><span class="math inline">\((2,1)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.582871\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.623025\)</span></td>
+<td style="text-align: center;">9</td>
+<td style="text-align: right;"><span class="math inline">\(1.623025\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.623025\)</span></td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=\ln x\)</span></td>
+<td style="text-align: left;">logarithmic</td>
+<td style="text-align: center;"><span class="math inline">\((0,1)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.414214\)</span></td>
+<td style="text-align: center;">9</td>
+<td style="text-align: right;"><span class="math inline">\(1.414214\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.414214\)</span></td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=\sqrt{x}\)</span></td>
+<td style="text-align: left;">radical</td>
+<td style="text-align: center;"><span class="math inline">\((4,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(3.500000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.936492\)</span></td>
+<td style="text-align: center;">3</td>
+<td style="text-align: right;"><span class="math inline">\(1.936492\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.936492\)</span></td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=\dfrac{1}{x}\)</span></td>
+<td style="text-align: left;">rational (<span class="math inline">\(x\)</span> in denom.)</td>
+<td style="text-align: center;"><span class="math inline">\((0,0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.414214\)</span></td>
+<td style="text-align: center;">11</td>
+<td style="text-align: right;"><span class="math inline">\(1.414214\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.414214\)</span></td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=\dfrac{4}{1+x^2}\)</span></td>
+<td style="text-align: left;">rational (<span class="math inline">\(x\)</span> in denom.)</td>
+<td style="text-align: center;"><span class="math inline">\((3,3)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.236068\)</span></td>
+<td style="text-align: center;">6</td>
+<td style="text-align: right;"><span class="math inline">\(2.236068\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.236068\)</span></td>
+<td style="text-align: right;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;"><span class="math inline">\(y=\sqrt[3]{x}\)</span></td>
+<td style="text-align: left;">cube root</td>
+<td style="text-align: center;"><span class="math inline">\((-1,2)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.230350\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.854055\)</span></td>
+<td style="text-align: center;">39</td>
+<td style="text-align: right;"><span class="math inline">\(1.854055\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.854055\)</span></td>
+<td style="text-align: right;">—</td>
+</tr>
+</tbody>
+</table></div>
+<p>Three changes cover the non-polynomial cases. <strong>Domain:</strong> <span class="math inline">\(\ln x\)</span>, <span class="math inline">\(\sqrt x\)</span> and <span class="math inline">\(1/x\)</span> exist
+only for <span class="math inline">\(x&gt;0\)</span>, so Newton steps are clipped back into the domain and the bracket is chosen inside
+it. <strong>Derivatives:</strong> <span class="math inline">\(f&#39;\)</span> and <span class="math inline">\(f&#39;&#39;\)</span> come from central differences (<span class="math inline">\(h=10^{-5}\)</span>, <span class="math inline">\(10^{-4}\)</span>), so
+no calculus is needed per function. <strong>Smoothness:</strong> <span class="math inline">\(\sqrt[3]{x}\)</span> has infinite slope at <span class="math inline">\(x=0\)</span>,
+so Newton needs 39 iterations instead of about 5, while golden section is unaffected. Note also
+that <span class="math inline">\(D&#39;(x)=0\)</span> is no longer solvable in closed form: for <span class="math inline">\(y=e^{x}\)</span> and <span class="math inline">\((2,1)\)</span> it reads
+<span class="math inline">\((x-2)+(e^{x}-1)e^{x}=0\)</span>.</p>
+<figure>
+<img src="media/p1_gallery_a.png" style="width:92.0%" />
+<figcaption>Two further parabolas, an exponential and a logarithm. Small dots are Newton iterates
+(light <span class="math inline">\(\to\)</span> dark); the dashed segment is the shortest distance.</figcaption>
+</figure>
+<figure>
+<img src="media/p1_gallery_b.png" style="width:92.0%" />
+<figcaption>A radical, two rational functions (<span class="math inline">\(x\)</span> in the denominator) and a cube root, handled by the
+same routines with a domain restriction where needed.</figcaption>
+</figure>
+</section>
+</section>
+<section id="fitting-a-line-and-a-parabola" class="level1">
+<h1>Fitting a line and a parabola</h1>
+<div class="box problem">
+<p><strong>Problem.</strong> For <span class="math inline">\((0,0.5)\)</span>, <span class="math inline">\((2,3.5)\)</span>, <span class="math inline">\((1,1.5)\)</span>, <span class="math inline">\((3,7.5)\)</span>, fit a line and a parabola by
+minimising the mean squared error. Set up the MSE, solve analytically and with multivariate
+Newton–Raphson optimising one parameter at a time, and report the MSE of each fit. Supply code and
+plots of the intermediate steps.</p>
+</div>
+<section id="setting-up-the-mse" class="level2">
+<h2>Setting up the MSE</h2>
+<p>With <span class="math inline">\(n=4\)</span> points,
+<span class="math display">\[\begin{aligned}
+  \mathrm{MSE}_{\text{line}}(m,b)&amp;=\frac1n\sum_{i=1}^{n}\bigl(mx_i+b-y_i\bigr)^{2},
+  \label{eq:mseline}\\
+  \mathrm{MSE}_{\text{parab}}(a,b,c)&amp;=\frac1n\sum_{i=1}^{n}\bigl(ax_i^{2}+bx_i+c-y_i\bigr)^{2}.
+\end{aligned}\]</span>
+Both are quadratic in their parameters, so each has a unique minimiser. The required sums:</p>
+<div class="tbl"><table>
+<caption>Sums for the normal equations (the ordering of the points is irrelevant).</caption>
+<thead>
+<tr>
+<th style="text-align: right;"><span class="math inline">\(x_i\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(y_i\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_i^{2}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_i^{3}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_i^{4}\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_iy_i\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_i^{2}y_i\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">1.5</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">3.5</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">14</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">7.5</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">81</td>
+<td style="text-align: right;">22.5</td>
+<td style="text-align: right;">67.5</td>
+</tr>
+<tr>
+<td style="text-align: right;"><span class="math inline">\(\Sigma=6\)</span></td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">98</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: right;">83</td>
+</tr>
+</tbody>
+</table></div>
+<p>Differentiating <span class="math inline">\(\eqref{eq:mseline}\)</span> and substituting the sums:
+<span class="math display">\[\begin{aligned}
+  \frac{\partial\mathrm{MSE}}{\partial m}&amp;=\frac2n\sum_i(mx_i+b-y_i)x_i=\tfrac12(14m+6b-31),
+  &amp;\frac{\partial^{2}\mathrm{MSE}}{\partial m^{2}}&amp;=7,
+  \label{eq:gradm}\\
+  \frac{\partial\mathrm{MSE}}{\partial b}&amp;=\frac2n\sum_i(mx_i+b-y_i)=\tfrac12(6m+4b-13),
+  &amp;\frac{\partial^{2}\mathrm{MSE}}{\partial b^{2}}&amp;=2,
+  \label{eq:gradb}
+\end{aligned}\]</span>
+with cross term <span class="math inline">\(\partial^{2}\mathrm{MSE}/\partial m\,\partial b=3\)</span>. The parabola follows the same pattern
+with one more parameter.</p>
+</section>
+<section id="analytical-solution-1" class="level2">
+<h2>Analytical solution</h2>
+<section id="line." class="level4">
+<h4>Line.</h4>
+<p>Setting <span class="math inline">\(\eqref{eq:gradm}\)</span> and <span class="math inline">\(\eqref{eq:gradb}\)</span> to zero gives the normal equations
+<span class="math display">\[\begin{bmatrix}14&amp;6\\6&amp;4\end{bmatrix}\begin{bmatrix}m\\b\end{bmatrix}
+  =\begin{bmatrix}31\\13\end{bmatrix},
+  \qquad \det=14(4)-6(6)=20,\]</span>
+<span class="math display">\[m=\frac{4(31)-6(13)}{20}=\frac{46}{20}=\mathbf{2.3},
+  \qquad
+  b=\frac{14(13)-6(31)}{20}=\frac{-4}{20}=\mathbf{-0.2}.\]</span>
+Fitted values <span class="math inline">\(-0.2,\ 2.1,\ 4.4,\ 6.7\)</span> at <span class="math inline">\(x=0,1,2,3\)</span>; residuals <span class="math inline">\(-0.7,\ 0.6,\ 0.9,\ -0.8\)</span>; so
+<span class="math display">\[\mathrm{MSE}_{\text{line}}=\tfrac14(0.49+0.36+0.81+0.64)=\frac{2.30}{4}=\mathbf{0.575}.\]</span></p>
+</section>
+<section id="parabola." class="level4">
+<h4>Parabola.</h4>
+<p>The three normal equations, reduced by Gaussian elimination:
+<span class="math display">\[\left[\begin{array}{ccc|c}
+    98&amp;36&amp;14&amp;83\\ 36&amp;14&amp;6&amp;31\\ 14&amp;6&amp;4&amp;13
+  \end{array}\right]
+  \longrightarrow
+  \left[\begin{array}{ccc|c}
+    98&amp;36&amp;14&amp;83\\[2pt]
+    0&amp;\tfrac{38}{49}&amp;\tfrac67&amp;\tfrac{25}{49}\\[3pt]
+    0&amp;0&amp;\tfrac{20}{19}&amp;\tfrac{11}{19}
+  \end{array}\right]\]</span>
+Back-substitution:
+<span class="math display">\[\begin{aligned}
+  c&amp;=\tfrac{11}{19}\cdot\tfrac{19}{20}=\tfrac{11}{20}=\mathbf{0.55},\\
+  38b&amp;=25-42(0.55)=1.9 \;\Rightarrow\; b=\mathbf{0.05},\\
+  98a&amp;=83-36(0.05)-14(0.55)=73.5 \;\Rightarrow\; a=\mathbf{0.75}.
+\end{aligned}\]</span>
+Fitted values <span class="math inline">\(0.55,\ 1.35,\ 3.65,\ 7.45\)</span>; residuals <span class="math inline">\(0.05,\ -0.15,\ 0.15,\ -0.05\)</span>; so
+<span class="math display">\[\mathrm{MSE}_{\text{parab}}=\tfrac14(0.0025+0.0225+0.0225+0.0025)=\frac{0.05}{4}=\mathbf{0.0125}.\]</span></p>
+<div class="box answer">
+<p><strong>Answers.</strong>
+Line: <span class="math inline">\(y=2.3x-0.2\)</span> with <span class="math inline">\(\mathrm{MSE}=0.575\)</span>.
+Parabola: <span class="math inline">\(y=0.75x^{2}+0.05x+0.55\)</span> with <span class="math inline">\(\mathrm{MSE}=0.0125\)</span>.</p>
+</div>
+<figure>
+<img src="media/p2_fits.png" />
+<figcaption>The two least-squares fits and their residuals. The line residuals alternate in sign,
+the signature of the curvature the parabola captures.</figcaption>
+</figure>
+</section>
+</section>
+<section id="numerical-solution-newtonraphson-one-parameter-per-step" class="level2">
+<h2>Numerical solution: Newton–Raphson, one parameter per step</h2>
+<p>Each step optimises one parameter with the others held fixed, by a one-dimensional Newton–Raphson
+step on that parameter’s partial derivative:
+<span class="math display">\[\theta_j\leftarrow\theta_j-\frac{\partial\mathrm{MSE}/\partial\theta_j}
+                                  {\partial^{2}\mathrm{MSE}/\partial\theta_j^{2}},
+  \qquad j=1,2,\dots\ \text{cyclically}.
+  \label{eq:coord}\]</span>
+For the line, substituting <span class="math inline">\(\eqref{eq:gradm}\)</span> and <span class="math inline">\(\eqref{eq:gradb}\)</span>,
+<span class="math display">\[m\leftarrow m-\frac{\tfrac12(14m+6b-31)}{7}=\frac{31-6b}{14},
+  \qquad
+  b\leftarrow b-\frac{\tfrac12(6m+4b-13)}{2}=\frac{13-6m}{4},
+  \label{eq:coordline}\]</span>
+and for the parabola
+<span class="math display">\[a\leftarrow\frac{83-36b-14c}{98},\qquad
+  b\leftarrow\frac{31-36a-6c}{14},\qquad
+  c\leftarrow\frac{13-14a-6b}{4}.\]</span>
+Since the MSE is quadratic in each parameter separately, each one-dimensional Newton step lands
+exactly on that parameter’s minimiser given the others.</p>
+<section id="line-starting-from-mb0." class="level4">
+<h4>Line, starting from <span class="math inline">\(m=b=0\)</span>.</h4>
+<p><span class="math display">\[\begin{aligned}
+  m_1&amp;=\frac{31-6(0)}{14}=2.214286,
+  &amp;b_1&amp;=\frac{13-6(2.214286)}{4}=-0.071429,\\
+  m_2&amp;=\frac{31.428571}{14}=2.244898,
+  &amp;b_2&amp;=\frac{13-6(2.244898)}{4}=-0.117347,\\
+  m_3&amp;=\frac{31.704082}{14}=2.264577,
+  &amp;b_3&amp;=-0.146866 .
+\end{aligned}\]</span>
+Substituting the <span class="math inline">\(b\)</span> update into the <span class="math inline">\(m\)</span> update,
+<span class="math display">\[m_{k+1}=\frac{31-6\bigl(\frac{13-6m_k}{4}\bigr)}{14}=\frac{11.5+9m_k}{14},\]</span>
+a linear fixed-point iteration with fixed point <span class="math inline">\(m=11.5/5=2.3\)</span> and contraction ratio
+<span class="math inline">\(9/14=0.642857\)</span>, so the error falls by about <span class="math inline">\(36\%\)</span> per sweep. Convergence is linear, not
+quadratic, because the steps are restricted to the coordinate directions and ignore the cross term
+<span class="math inline">\(\partial^{2}\mathrm{MSE}/\partial m\,\partial b=3\)</span>.</p>
+</section>
+<section id="parabola-starting-from-abc0." class="level4">
+<h4>Parabola, starting from <span class="math inline">\(a=b=c=0\)</span>.</h4>
+<p><span class="math display">\[\begin{aligned}
+  a_1&amp;=\frac{83}{98}=0.846939,\qquad
+  b_1=\frac{31-36(0.846939)}{14}=0.036443,\\
+  c_1&amp;=\frac{13-14(0.846939)-6(0.036443)}{4}=0.231050,\qquad \mathrm{MSE}=0.117988,\\
+  a_2&amp;=\frac{83-36(0.036443)-14(0.231050)}{98}=0.800544,\qquad
+  b_2=0.056723,\\
+  c_2&amp;=\frac{13-14(0.800544)-6(0.056723)}{4}=0.363013,\qquad \mathrm{MSE}=0.046400 .
+\end{aligned}\]</span></p>
+<div class="tbl"><table>
+<caption>Coordinate-wise Newton–Raphson for the line, from <span class="math inline">\(m=b=0\)</span>.</caption>
+<thead>
+<tr>
+<th style="text-align: center;">sweep</th>
+<th style="text-align: left;">updated</th>
+<th style="text-align: right;"><span class="math inline">\(m\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(b\)</span></th>
+<th style="text-align: right;">MSE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">start</td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(17.750000\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.214286\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.589286\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.214286\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.071429\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.584184\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: left;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.244898\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.071429\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.580904\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.244898\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.117347\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.578795\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.264577\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.117347\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.577440\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.264577\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.146866\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.576568\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: left;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.277228\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.146866\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.576008\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.277228\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.165842\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.575648\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td style="text-align: left;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.285361\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.165842\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.575417\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.285361\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.178042\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.575268\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td style="text-align: left;"><span class="math inline">\(m\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.290589\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.178042\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.575172\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.290589\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.185884\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.575111\)</span></td>
+</tr>
+<tr>
+<td colspan="5" style="text-align: center;"><em><span class="math inline">\(\vdots\)</span>converged after 48 sweeps to <span class="math inline">\(m=2.3000,\;b=-0.2000\)</span>, MSE <span class="math inline">\(=0.5750\)</span> <span class="math inline">\(\vdots\)</span></em></td>
+</tr>
+</tbody>
+</table></div>
+<div class="tbl"><table>
+<caption>Coordinate-wise Newton–Raphson for the parabola, from <span class="math inline">\(a=b=c=0\)</span>.</caption>
+<thead>
+<tr>
+<th style="text-align: center;">sweep</th>
+<th style="text-align: left;">updated</th>
+<th style="text-align: right;"><span class="math inline">\(a\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(b\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(c\)</span></th>
+<th style="text-align: right;">MSE</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: left;">start</td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(17.750000\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"><span class="math inline">\(a\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.846939\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.176020\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.846939\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.036443\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.000000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.171372\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: left;"><span class="math inline">\(c\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.846939\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.036443\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.231050\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.117988\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: left;"><span class="math inline">\(a\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.800544\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.036443\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.231050\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.065253\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.800544\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.056722\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.231050\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.063814\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: left;"><span class="math inline">\(c\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.800544\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.056722\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.363012\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.046400\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;"><span class="math inline">\(a\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.774243\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.056722\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.363012\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.029452\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.774243\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.067798\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.363012\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.029023\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: left;"><span class="math inline">\(c\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.774243\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.067798\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.438452\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.023332\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: left;"><span class="math inline">\(a\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.759398\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.067798\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.438452\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.017932\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: left;"><span class="math inline">\(b\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.759398\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.073641\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.438452\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.017813\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: left;"><span class="math inline">\(c\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.759398\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.073641\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.481647\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.015947\)</span></td>
+</tr>
+<tr>
+<td colspan="6" style="text-align: center;"><em><span class="math inline">\(\vdots\)</span>converged after 476 sweeps to <span class="math inline">\(a=0.7500,\;b=0.0500,\;c=0.5500\)</span>, MSE <span class="math inline">\(=0.0125\)</span> <span class="math inline">\(\vdots\)</span></em></td>
+</tr>
+</tbody>
+</table></div>
+</section>
+<section id="comparison-the-full-multivariate-newton-step." class="level4">
+<h4>Comparison: the full multivariate Newton step.</h4>
+<p>Updating all parameters together,
+<span class="math inline">\(\boldsymbol\theta\leftarrow\boldsymbol\theta-H^{-1}\nabla\mathrm{MSE}\)</span>, uses the cross terms and minimises
+a quadratic in one step:
+<span class="math display">\[\begin{bmatrix}m\\b\end{bmatrix}
+  =\begin{bmatrix}0\\0\end{bmatrix}
+   -\begin{bmatrix}7&amp;3\\3&amp;2\end{bmatrix}^{-1}\begin{bmatrix}-15.5\\-6.5\end{bmatrix}
+  =\frac15\begin{bmatrix}2&amp;-3\\-3&amp;7\end{bmatrix}\begin{bmatrix}15.5\\6.5\end{bmatrix}
+  =\begin{bmatrix}2.3\\-0.2\end{bmatrix}.\]</span>
+The parabola’s normal matrix is far worse conditioned (<span class="math inline">\(\approx363\)</span> against <span class="math inline">\(\approx14\)</span> for the
+line), so its coordinate iteration needs about 480 sweeps to reach <span class="math inline">\(10^{-10}\)</span> against about 50 for
+the line, while the full step needs one for either model.</p>
+</section>
+</section>
+<section id="results" class="level2">
+<h2>Results</h2>
+<div class="tbl"><table>
+<caption>All methods reach the same optimum; they differ only in cost.</caption>
+<thead>
+<tr>
+<th style="text-align: left;">model</th>
+<th style="text-align: left;">method</th>
+<th style="text-align: left;">parameters</th>
+<th style="text-align: right;">MSE</th>
+<th style="text-align: left;">cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Line</td>
+<td style="text-align: left;">Analytical (normal equations)</td>
+<td style="text-align: left;"><span class="math inline">\(m=2.3000,\; b=-0.2000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5750\)</span></td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;">Line</td>
+<td style="text-align: left;">Newton, one parameter at a time</td>
+<td style="text-align: left;"><span class="math inline">\(m=2.3000,\; b=-0.2000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5750\)</span></td>
+<td style="text-align: left;">48 sweeps</td>
+</tr>
+<tr>
+<td style="text-align: left;">Line</td>
+<td style="text-align: left;">Newton, full multivariate step</td>
+<td style="text-align: left;"><span class="math inline">\(m=2.3000,\; b=-0.2000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5750\)</span></td>
+<td style="text-align: left;">1 step</td>
+</tr>
+<tr>
+<td style="text-align: left;">Parabola</td>
+<td style="text-align: left;">Analytical (normal equations)</td>
+<td style="text-align: left;"><span class="math inline">\(a=0.7500,\; b=0.0500,\; c=0.5500\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.0125\)</span></td>
+<td style="text-align: left;">—</td>
+</tr>
+<tr>
+<td style="text-align: left;">Parabola</td>
+<td style="text-align: left;">Newton, one parameter at a time</td>
+<td style="text-align: left;"><span class="math inline">\(a=0.7500,\; b=0.0500,\; c=0.5500\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.0125\)</span></td>
+<td style="text-align: left;">476 sweeps</td>
+</tr>
+<tr>
+<td style="text-align: left;">Parabola</td>
+<td style="text-align: left;">Newton, full multivariate step</td>
+<td style="text-align: left;"><span class="math inline">\(a=0.7500,\; b=0.0500,\; c=0.5500\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.0125\)</span></td>
+<td style="text-align: left;">1 step</td>
+</tr>
+</tbody>
+</table></div>
+<figure>
+<img src="media/p2_line_path.png" />
+<figcaption>(a) Contours of <span class="math inline">\(\mathrm{MSE}(m,b)\)</span> with the optimisation paths: the coordinate scheme moves
+parallel to the <span class="math inline">\(m\)</span> axis, then the <span class="math inline">\(b\)</span> axis, each move ending tangent to a contour (inset), while
+the full Newton step goes straight to the optimum. (b) The fitted line after each sweep.</figcaption>
+</figure>
+<figure>
+<img src="media/p2_convergence.png" />
+<figcaption>(a) The parabola after sweeps 0–30; most of the improvement happens in the first three.
+(b) Excess MSE per sweep on a log scale, with the full Newton step marked.</figcaption>
+</figure>
+</section>
+<section id="python-implementation-1" class="level2">
+<h2>Python implementation</h2>
+<p><code>fitting.py</code> (the Part 2 listing below) writes both models as
+<span class="math inline">\(\hat{\mathbf y}=\Phi\boldsymbol\theta\)</span>, with <span class="math inline">\(\Phi=[\,\mathbf x\ \ \mathbf 1\,]\)</span> for the line and
+<span class="math inline">\([\,\mathbf x^{2}\ \ \mathbf x\ \ \mathbf 1\,]\)</span> for the parabola, so one gradient and one Hessian
+serve both models and any degree:
+<span class="math display">\[\nabla \mathrm{MSE}=\frac2n\Phi^{\mathsf{T}}(\Phi\boldsymbol\theta-\mathbf y),
+  \qquad
+  H=\frac2n\Phi^{\mathsf{T}}\Phi .\]</span>
+The three solvers are <code>normal_equations</code> (analytical, via a hand-written Gaussian
+elimination), <code>coordinate_newton</code> (equation <span class="math inline">\(\eqref{eq:coord}\)</span>, which records every
+sub-step), and <code>full_newton</code> for comparison.</p>
+</section>
+</section>
+<section id="app:plots" class="level1">
+<h1>Intermediate-step plots for the remaining points</h1>
+<figure>
+<p><img src="media/p1_newton_0_0.png" style="width:99.0%" alt="image" /><br />
+<img src="media/p1_newton_2_0.png" style="width:99.0%" alt="image" /><br />
+<img src="media/p1_newton_6_0.png" style="width:99.0%" alt="image" /></p>
+<figcaption>Newton–Raphson for <span class="math inline">\((0,0)\)</span>, <span class="math inline">\((2,0)\)</span> and <span class="math inline">\((6,0)\)</span>. For <span class="math inline">\((0,0)\)</span> the initial guess is already
+the solution.</figcaption>
+</figure>
+<figure>
+<p><img src="media/p1_golden_0_0.png" style="width:99.0%" alt="image" /><br />
+<img src="media/p1_golden_-8_0.png" style="width:99.0%" alt="image" /></p>
+<figcaption>Golden section search for <span class="math inline">\((0,0)\)</span> and <span class="math inline">\((-8,0)\)</span>.</figcaption>
+</figure>
+<figure>
+<p><img src="media/p1_golden_2_0.png" style="width:99.0%" alt="image" /><br />
+<img src="media/p1_golden_6_0.png" style="width:99.0%" alt="image" /></p>
+<figcaption>Golden section search for <span class="math inline">\((2,0)\)</span> and <span class="math inline">\((6,0)\)</span>.</figcaption>
+</figure>
+</section>
+<section id="app:distance" class="level1">
+<h1><code>distance.py</code> — Part 1 code</h1>
+<pre><code class="language-python">&quot;&quot;&quot;
+SYDE 572 - Assignment 1, Part 1
+================================
+Shortest distance from a point (x0, y0) to a curve y = f(x).
+
+Run this file to reproduce every Part 1 result:
+
+    python distance.py
+
+It prints the result tables and writes all Part 1 figures to ../media/.
+
+Contents
+--------
+Section 1   The objective function D(x) and its derivatives
+Section 2   Analytical solution for a parabola (Cardano&#39;s cubic formula)
+Section 3   Numerical method A: Newton-Raphson on D&#39;(x) = 0
+Section 4   Numerical method B: Golden section search on D(x)
+Section 5   Convenience wrappers (any point, any parabola, any function)
+Section 6   Plotting helpers
+Section 7   Demonstrations: the assigned points, other curves, non-polynomial
+            functions, and a case with several stationary points
+
+Only numpy and matplotlib are used, and no optimisation library: the three
+solvers, the cubic solver and the finite-difference derivatives are all written
+out here.
+&quot;&quot;&quot;
+
+import math
+import os
+
+import matplotlib
+matplotlib.use(&quot;Agg&quot;)                      # write PNG files, no interactive window
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+
+# The golden ratio and the fraction of the bracket used by golden section search.
+PHI = (1 + math.sqrt(5)) / 2               # 1.618034
+RESPHI = 2 - PHI                           # 1/phi^2 = 0.381966
+
+MEDIA = os.path.join(os.path.dirname(os.path.abspath(__file__)), &quot;..&quot;, &quot;media&quot;)
+
+
+# =============================================================================
+# Section 1.  The objective function
+# =============================================================================
+def dist_sq(x, x0, y0, f):
+    &quot;&quot;&quot;Squared distance D(x) from the point (x0, y0) to the curve point (x, f(x)).
+
+    The true distance is sqrt(D(x)).  Because the square root is monotonically
+    increasing, the x that minimises D also minimises the distance, so every
+    solver below works with D and takes the square root only at the very end.
+    &quot;&quot;&quot;
+    return (x - x0) ** 2 + (f(x) - y0) ** 2
+
+
+def _finite(v):
+    &quot;&quot;&quot;True if v is a usable number (not NaN or +-inf).&quot;&quot;&quot;
+    return isinstance(v, (int, float, np.floating)) and math.isfinite(float(v))
+
+
+def numeric_d1(f, h=1e-5):
+    &quot;&quot;&quot;First derivative of f by central differences: used when f&#39; is unknown.
+
+    Returned as a function so it can be dropped in wherever an analytic
+    derivative would go.  h = 1e-5 keeps the truncation error (order h^2) and
+    the floating-point cancellation error (order eps/h) comparably small.
+
+    Near the edge of the domain (e.g. ln x at x = 1e-6) one of the two sample
+    points can fall outside it and return NaN, so the routine falls back to a
+    one-sided difference there.
+    &quot;&quot;&quot;
+    def d1(x):
+        fp, fm_ = f(x + h), f(x - h)
+        if _finite(fp) and _finite(fm_):
+            return (fp - fm_) / (2 * h)
+        if _finite(fp):                     # forward difference
+            return (fp - f(x)) / h
+        return (f(x) - fm_) / h             # backward difference
+    return d1
+
+
+def numeric_d2(f, h=1e-4):
+    &quot;&quot;&quot;Second derivative of f by central differences (larger h: divides by h^2).
+
+    Same domain-edge fallback as numeric_d1: if a sample point is outside the
+    domain, the stencil is shifted to one side.
+    &quot;&quot;&quot;
+    def d2(x):
+        f0, fp, fm_ = f(x), f(x + h), f(x - h)
+        if _finite(fp) and _finite(fm_):
+            return (fp - 2 * f0 + fm_) / (h * h)
+        if _finite(fp):                     # forward stencil
+            return (f(x + 2 * h) - 2 * fp + f0) / (h * h)
+        return (f0 - 2 * fm_ + f(x - 2 * h)) / (h * h)
+    return d2
+
+
+# =============================================================================
+# Section 2.  Analytical solution for a parabola
+# =============================================================================
+def _cbrt(v):
+    &quot;&quot;&quot;Real cube root, including for negative v (v ** (1/3) fails for v &lt; 0).&quot;&quot;&quot;
+    return math.copysign(abs(v) ** (1 / 3), v)
+
+
+def solve_cubic(A, B, C, D):
+    &quot;&quot;&quot;All real roots of A x^3 + B x^2 + C x + D = 0 (A != 0).
+
+    Substituting x = t - B/(3A) removes the quadratic term and leaves the
+    depressed cubic t^3 + p t + q = 0, which Cardano&#39;s formula solves.  The sign
+    of the discriminant decides how many real roots there are:
+
+        disc &gt; 0  -&gt;  one real root   (two cube roots added)
+        disc &lt; 0  -&gt;  three real roots (trigonometric form; cube roots of a
+                                        complex number would be needed instead)
+        disc = 0  -&gt;  a repeated root
+    &quot;&quot;&quot;
+    b, c, d = B / A, C / A, D / A
+    p = c - b * b / 3
+    q = 2 * b ** 3 / 27 - b * c / 3 + d
+    shift = -b / 3                                  # undo the substitution later
+    disc = (q / 2) ** 2 + (p / 3) ** 3
+
+    if disc &gt; 1e-14:                                # one real root
+        s = math.sqrt(disc)
+        t = [_cbrt(-q / 2 + s) + _cbrt(-q / 2 - s)]
+    elif disc &lt; -1e-14:                             # three distinct real roots
+        r = 2 * math.sqrt(-p / 3)
+        phi = math.acos(3 * q / (p * r))
+        t = [r * math.cos((phi - 2 * math.pi * k) / 3) for k in range(3)]
+    else:                                           # repeated roots
+        u = _cbrt(-q / 2)
+        t = [2 * u, -u]
+
+    return sorted(ti + shift for ti in t)
+
+
+def analytical_parabola(x0, y0, a, b, c):
+    &quot;&quot;&quot;Exact closest point on the parabola y = a x^2 + b x + c to (x0, y0).
+
+    Setting D&#39;(x) = 0 gives
+        (x - x0) + (a x^2 + b x + c - y0)(2a x + b) = 0,
+    which expands to the cubic
+        2a^2 x^3 + 3ab x^2 + (b^2 + 2a(c - y0) + 1) x + (b(c - y0) - x0) = 0.
+
+    Every real root is a stationary point of D, so the root with the smallest D
+    is the answer (D -&gt; infinity as |x| -&gt; infinity, so a minimum always exists).
+
+    If a = 0 the &quot;parabola&quot; is the straight line y = b x + c, for which the
+    condition is linear and gives x* = (x0 + b(y0 - c)) / (1 + b^2) directly.
+
+    Returns (distance, x*, all real roots).
+    &quot;&quot;&quot;
+    f = lambda x: a * x * x + b * x + c
+    k = c - y0
+
+    if a == 0:                                      # degenerate case: a line
+        xs = (x0 + b * (y0 - c)) / (1 + b * b)
+        return math.sqrt(dist_sq(xs, x0, y0, f)), xs, [xs]
+
+    roots = solve_cubic(2 * a * a, 3 * a * b, b * b + 2 * a * k + 1, b * k - x0)
+    best = min(roots, key=lambda x: dist_sq(x, x0, y0, f))
+    return math.sqrt(dist_sq(best, x0, y0, f)), best, roots
+
+
+# =============================================================================
+# Section 3.  Numerical method A: Newton-Raphson
+# =============================================================================
+def newton_distance(x0, y0, f, df=None, ddf=None, initial_guess=0.0,
+                    tolerance=1e-7, max_iter=100, domain=None):
+    &quot;&quot;&quot;Newton-Raphson applied to the root-finding problem D&#39;(x) = 0.
+
+        D&#39;(x)  = 2(x - x0) + 2(f(x) - y0) f&#39;(x)
+        D&#39;&#39;(x) = 2 + 2 f&#39;(x)^2 + 2(f(x) - y0) f&#39;&#39;(x)
+        x_{k+1} = x_k - D&#39;(x_k) / D&#39;&#39;(x_k)
+
+    df, ddf   : derivatives of f.  If omitted, central differences are used, so
+                the routine works for any f the caller can evaluate.
+    domain    : (lo, hi) to clip each iterate into the domain of f - needed for
+                ln x, sqrt(x), 1/x, where an unconstrained step can overshoot
+                into x &lt;= 0 and produce NaN.
+    tolerance : stop once the step is smaller than this.
+
+    Returns (distance, x*, history), where history holds x_k, D, D&#39;, D&#39;&#39; and the
+    next iterate for every step, which is what the step plots are drawn from.
+    &quot;&quot;&quot;
+    df = df or numeric_d1(f)
+    ddf = ddf or numeric_d2(f)
+
+    x = initial_guess
+    history = []
+    for k in range(max_iter):
+        d1 = 2 * (x - x0) + 2 * (f(x) - y0) * df(x)
+        d2 = 2 + 2 * df(x) ** 2 + 2 * (f(x) - y0) * ddf(x)
+
+        next_x = x - d1 / d2                        # the Newton step itself
+        if domain is not None:
+            next_x = min(max(next_x, domain[0]), domain[1])
+
+        history.append(dict(k=k, x=x, D=dist_sq(x, x0, y0, f),
+                            d1=d1, d2=d2, next_x=next_x))
+        if abs(next_x - x) &lt; tolerance:
+            x = next_x
+            break
+        x = next_x
+
+    return math.sqrt(dist_sq(x, x0, y0, f)), x, history
+
+
+def newton_multistart(x0, y0, f, df=None, ddf=None, starts=(-5, -2, 0, 2, 5), **kw):
+    &quot;&quot;&quot;Run Newton from several starting guesses and keep the closest result.
+
+    Newton converges to a *stationary* point of D, which may be a local maximum
+    or a non-global minimum (see multiple_minima_demo).  Trying several starts
+    is the cheapest guard against that.
+    &quot;&quot;&quot;
+    runs = [newton_distance(x0, y0, f, df, ddf, initial_guess=s, **kw) for s in starts]
+    # A run can diverge to NaN (e.g. a starting guess right on the edge of the
+    # domain of f); those are discarded rather than compared, since any
+    # comparison against NaN is False and would corrupt the minimum.
+    usable = [r for r in runs if math.isfinite(r[0])]
+    if not usable:
+        raise ValueError(&quot;every Newton start diverged; check the starting guesses or the domain&quot;)
+    return min(usable, key=lambda r: r[0])
+
+
+# =============================================================================
+# Section 4.  Numerical method B: Golden section search
+# =============================================================================
+def golden_section(x0, y0, f, a, b, tolerance=1e-7, max_iter=500):
+    &quot;&quot;&quot;Golden section search for the minimum of D on the bracket [a, b].
+
+    Two interior probes are placed symmetrically:
+        x1 = a + r(b - a),  x2 = b - r(b - a),  r = 2 - phi = 0.381966.
+    If D(x1) &lt; D(x2) the minimum of a unimodal D cannot lie in (x2, b], so the
+    bracket becomes [a, x2]; otherwise it becomes [x1, b].  The golden ratio is
+    chosen so the surviving probe is already in the right place for the new
+    bracket, so each iteration costs one new evaluation of D and shrinks the
+    bracket by 1/phi = 0.618.
+
+    No derivatives are used anywhere, which is the whole point of this method.
+
+    Returns (distance, x*, history) with the bracket and both probes per step.
+    &quot;&quot;&quot;
+    D = lambda x: dist_sq(x, x0, y0, f)
+
+    x1 = a + RESPHI * (b - a)
+    x2 = b - RESPHI * (b - a)
+    f1, f2 = D(x1), D(x2)
+
+    history = []
+    k = 0
+    while abs(b - a) &gt; tolerance and k &lt; max_iter:
+        history.append(dict(k=k, a=a, b=b, x1=x1, x2=x2, D1=f1, D2=f2))
+        if f1 &lt; f2:                     # minimum is in [a, x2]; x1 becomes the new x2
+            b, x2, f2 = x2, x1, f1
+            x1 = a + RESPHI * (b - a)
+            f1 = D(x1)
+        else:                           # minimum is in [x1, b]; x2 becomes the new x1
+            a, x1, f1 = x1, x2, f2
+            x2 = b - RESPHI * (b - a)
+            f2 = D(x2)
+        k += 1
+
+    history.append(dict(k=k, a=a, b=b, x1=x1, x2=x2, D1=f1, D2=f2))
+    best_x = (a + b) / 2                # the midpoint of the final bracket
+    return math.sqrt(D(best_x)), best_x, history
+
+
+# =============================================================================
+# Section 5.  Convenience wrappers
+# =============================================================================
+def parabola(a, b, c):
+    &quot;&quot;&quot;Return f, f&#39;, f&#39;&#39; for y = a x^2 + b x + c.&quot;&quot;&quot;
+    return (lambda x: a * x * x + b * x + c,
+            lambda x: 2 * a * x + b,
+            lambda x: 2 * a)
+
+
+def distance_to_parabola(x0, y0, a, b, c, bracket=(-10, 10)):
+    &quot;&quot;&quot;Distance from any point to any parabola, by all three methods.
+
+    &gt;&gt;&gt; r = distance_to_parabola(-4, 0, a=1, b=0, c=5)
+    &gt;&gt;&gt; round(r[&#39;analytical&#39;][0], 6), round(r[&#39;newton&#39;][0], 6), round(r[&#39;golden&#39;][0], 6)
+    (6.289845, 6.289845, 6.289845)
+    &quot;&quot;&quot;
+    f, df, ddf = parabola(a, b, c)
+    da, xa, _ = analytical_parabola(x0, y0, a, b, c)
+    dn, xn, hn = newton_distance(x0, y0, f, df, ddf, initial_guess=0.0)
+    dg, xg, hg = golden_section(x0, y0, f, *bracket)
+    return dict(analytical=(da, xa),
+                newton=(dn, xn, len(hn)),
+                golden=(dg, xg, len(hg) - 1))
+
+
+def distance_to_curve(x0, y0, f, bracket, domain=None, starts=None):
+    &quot;&quot;&quot;Distance from any point to any curve y = f(x), without needing f&#39; or f&#39;&#39;.
+
+    This is the &quot;slight modification&quot; asked for in the assignment: the
+    derivatives are estimated numerically and the search is confined to the
+    domain of f, so exponential, logarithmic, rational and radical functions all
+    work with the same two solvers.
+    &quot;&quot;&quot;
+    lo, hi = bracket
+    if starts is None:
+        starts = sorted({min(max(x0, lo + 0.1), hi - 0.1), (lo + hi) / 2,
+                         lo + 0.25 * (hi - lo), lo + 0.75 * (hi - lo)})
+    dn, xn, hn = newton_multistart(x0, y0, f, starts=starts, domain=domain)
+    dg, xg, hg = golden_section(x0, y0, f, lo, hi)
+
+    # Brute-force reference: the minimum over a fine grid, used only as a check.
+    grid = np.linspace(lo, hi, 400001)
+    ref_x = float(grid[np.argmin(dist_sq(grid, x0, y0, f))])
+
+    return dict(newton=(dn, xn, len(hn)), newton_history=hn,
+                golden=(dg, xg, len(hg) - 1),
+                grid=(math.sqrt(dist_sq(ref_x, x0, y0, f)), ref_x))
+
+
+# =============================================================================
+# Section 6.  Plotting helpers
+# =============================================================================
+INK, INK2, MUTED, GRID = &quot;#0b0b0b&quot;, &quot;#52514e&quot;, &quot;#8a8984&quot;, &quot;#e6e5e0&quot;
+BLUE, ORANGE, AQUA, VIOLET, RED = &quot;#2a78d6&quot;, &quot;#eb6834&quot;, &quot;#1baf7a&quot;, &quot;#4a3aa7&quot;, &quot;#e34948&quot;
+SURFACE = &quot;#fcfcfb&quot;
+# Light -&gt; dark blue ramp: early iterates are pale, the converged one is dark.
+ITER_CMAP = LinearSegmentedColormap.from_list(&quot;iter&quot;, [&quot;#b9d4f3&quot;, &quot;#2a78d6&quot;, &quot;#0f3c75&quot;])
+
+plt.rcParams.update({
+    &quot;figure.dpi&quot;: 110, &quot;savefig.dpi&quot;: 170,
+    &quot;figure.facecolor&quot;: SURFACE, &quot;axes.facecolor&quot;: SURFACE, &quot;savefig.facecolor&quot;: SURFACE,
+    &quot;font.family&quot;: &quot;DejaVu Sans&quot;, &quot;font.size&quot;: 10.5,
+    &quot;axes.edgecolor&quot;: MUTED, &quot;axes.labelcolor&quot;: INK2, &quot;axes.titlecolor&quot;: INK,
+    &quot;axes.titlesize&quot;: 12, &quot;axes.titleweight&quot;: &quot;bold&quot;, &quot;axes.titlelocation&quot;: &quot;left&quot;,
+    &quot;axes.titlepad&quot;: 10,
+    &quot;axes.spines.top&quot;: False, &quot;axes.spines.right&quot;: False,
+    &quot;axes.grid&quot;: True, &quot;grid.color&quot;: GRID, &quot;grid.linewidth&quot;: 0.8,
+    &quot;xtick.color&quot;: INK2, &quot;ytick.color&quot;: INK2, &quot;legend.frameon&quot;: False,
+    &quot;lines.linewidth&quot;: 2, &quot;mathtext.fontset&quot;: &quot;dejavusans&quot;,
+})
+
+
+def save(fig, name):
+    &quot;&quot;&quot;Save a figure into ../media/ and report it.&quot;&quot;&quot;
+    os.makedirs(MEDIA, exist_ok=True)
+    fig.savefig(os.path.join(MEDIA, name), bbox_inches=&quot;tight&quot;, pad_inches=0.15)
+    plt.close(fig)
+    print(&quot;  figure:&quot;, name)
+
+
+def draw_shortest_segment(ax, x0, y0, xs, f):
+    &quot;&quot;&quot;Dashed segment from the query point to the closest curve point.&quot;&quot;&quot;
+    ax.plot([x0, xs], [y0, f(xs)], color=ORANGE, lw=2, ls=(0, (4, 2)), zorder=4)
+    ax.scatter([xs], [f(xs)], s=70, color=AQUA, edgecolor=SURFACE, linewidth=2, zorder=6)
+
+
+def draw_query_point(ax, x0, y0, text=None, dx=0.3, dy=-0.9):
+    ax.scatter([x0], [y0], s=80, color=ORANGE, edgecolor=SURFACE, linewidth=2, zorder=6)
+    if text:
+        ax.annotate(text, (x0, y0), xytext=(x0 + dx, y0 + dy), color=INK, fontsize=10)
+
+
+def plot_overview(points, f, results, name=&quot;p1_overview.png&quot;):
+    &quot;&quot;&quot;All five query points, their closest curve points and the distances.&quot;&quot;&quot;
+    fig, ax = plt.subplots(figsize=(9, 5.6))
+    xs = np.linspace(-3.6, 3.6, 400)
+    ax.plot(xs, f(xs), color=BLUE, lw=2.5, label=r&quot;$y = x^2 + 5$&quot;, zorder=3)
+
+    for (x0, y0), r in zip(points, results):
+        xa = r[&quot;analytical&quot;][1]
+        ax.plot([x0, xa], [y0, f(xa)], color=ORANGE, lw=1.8, ls=(0, (4, 2)), zorder=4)
+        ax.scatter([xa], [f(xa)], s=60, color=AQUA, edgecolor=SURFACE, linewidth=2, zorder=6)
+        ax.scatter([x0], [y0], s=80, color=ORANGE, edgecolor=SURFACE, linewidth=2, zorder=6)
+        ax.annotate(f&quot;({x0}, {y0})\nd = {r[&#39;analytical&#39;][0]:.4f}&quot;, (x0, y0),
+                    xytext=(0, -62 if x0 == 2 else -34), textcoords=&quot;offset points&quot;,
+                    ha=&quot;center&quot;, fontsize=9.5, color=INK)
+
+    # legend proxies
+    ax.plot([], [], color=ORANGE, lw=1.8, ls=(0, (4, 2)), label=&quot;shortest segment&quot;)
+    ax.scatter([], [], s=60, color=AQUA, label=&quot;closest point on curve&quot;)
+    ax.scatter([], [], s=80, color=ORANGE, label=&quot;query point&quot;)
+
+    ax.set_xlim(-9.5, 7.5); ax.set_ylim(-4.6, 13)
+    ax.set_aspect(&quot;equal&quot;)                  # so the right angles look like right angles
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;y&quot;)
+    ax.set_title(&quot;Shortest distance from five points to y = x² + 5&quot;)
+    ax.legend(loc=&quot;upper left&quot;, fontsize=9.5)
+    save(fig, name)
+
+
+def plot_newton_steps(x0, y0, f, df, ddf, history, x_exact, x_final, d_final):
+    &quot;&quot;&quot;Three panels of Newton&#39;s intermediate steps for one query point.
+
+    (a) the iterates projected onto the curve
+    (b) the tangent construction on D&#39;(x): each tangent is followed to its zero
+    (c) |x_k - x*| on a log scale, showing the quadratic collapse
+    &quot;&quot;&quot;
+    iterates = [h[&quot;x&quot;] for h in history] + [x_final]
+    n = len(iterates)
+    cols = [ITER_CMAP(i / max(n - 1, 1)) for i in range(n)]
+
+    fig, axs = plt.subplots(1, 3, figsize=(15, 4.6),
+                            gridspec_kw=dict(width_ratios=[1.15, 1.15, 0.9]))
+
+    # ---- (a) geometry -----------------------------------------------------
+    ax = axs[0]
+    lo, hi = min(x0, -2.5) - 1, max(x0, 2.5) + 1
+    xx = np.linspace(lo, hi, 400)
+    ax.plot(xx, f(xx), color=BLUE, lw=2.5, label=&quot;y = x² + 5&quot;)
+    for i, xi in enumerate(iterates):
+        ax.plot([x0, xi], [y0, f(xi)], color=cols[i], lw=1.2, alpha=0.9)
+        ax.scatter([xi], [f(xi)], s=36, color=cols[i], edgecolor=SURFACE, linewidth=1, zorder=5)
+    draw_shortest_segment(ax, x0, y0, x_exact, f)
+    draw_query_point(ax, x0, y0, f&quot;({x0}, {y0})&quot;, dx=0.2, dy=-1.3)
+    ax.set_xlim(lo, hi); ax.set_ylim(-1.5, 10)
+    ax.set_aspect(&quot;equal&quot;, adjustable=&quot;datalim&quot;)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;y&quot;)
+    ax.set_title(&quot;(a) Newton iterates on the curve&quot;)
+    ax.text(0.02, 0.97, f&quot;d* = {d_final:.6f}\nx* = {x_final:+.6f}&quot;, transform=ax.transAxes,
+            va=&quot;top&quot;, fontsize=9.5, color=INK,
+            bbox=dict(boxstyle=&quot;round,pad=0.4&quot;, fc=&quot;white&quot;, ec=GRID))
+
+    # ---- (b) the tangent steps on D&#39;(x) -----------------------------------
+    ax = axs[1]
+    Dp = lambda x: 2 * (x - x0) + 2 * (f(x) - y0) * df(x)
+    xl, xh = min(iterates), max(iterates)
+    pad = max(xh - xl, 0.3) * 0.35
+    xx = np.linspace(xl - pad, xh + pad, 400)
+    ax.axhline(0, color=MUTED, lw=1)
+    ax.plot(xx, Dp(xx), color=VIOLET, lw=2.3, label=&quot;D′(x) = 4x³ + 22x − 2x₀&quot;)
+    for i, h in enumerate(history):
+        ax.plot([h[&quot;x&quot;], h[&quot;x&quot;]], [0, h[&quot;d1&quot;]], color=cols[i], lw=1, ls=&quot;:&quot;)
+        ax.plot([h[&quot;x&quot;], h[&quot;next_x&quot;]], [h[&quot;d1&quot;], 0], color=cols[i], lw=1.6)
+        ax.scatter([h[&quot;x&quot;]], [h[&quot;d1&quot;]], s=34, color=cols[i], zorder=5, edgecolor=SURFACE)
+        if i &lt; 2:
+            ax.annotate(f&quot;x{i}&quot;, (h[&quot;x&quot;], 0), xytext=(0, 7 if h[&quot;d1&quot;] &lt; 0 else -14),
+                        textcoords=&quot;offset points&quot;, ha=&quot;center&quot;, fontsize=9, color=INK2)
+    ax.scatter([x_exact], [0], s=70, color=AQUA, edgecolor=SURFACE, linewidth=2, zorder=6)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;D′(x)&quot;)
+    ax.set_title(&quot;(b) Tangent steps on D′(x) = 0&quot;)
+    ax.legend(loc=&quot;upper left&quot;, fontsize=9)
+
+    # ---- (c) convergence --------------------------------------------------
+    ax = axs[2]
+    err = [max(abs(xi - x_exact), 1e-17) for xi in iterates]    # clip for the log axis
+    ax.semilogy(range(n), err, color=BLUE, marker=&quot;o&quot;, ms=6, mec=SURFACE)
+    ax.set_xlabel(&quot;iteration k&quot;); ax.set_ylabel(&quot;|x_k − x*|&quot;)
+    ax.set_title(&quot;(c) Quadratic convergence&quot;)
+    ax.set_xticks(range(n))
+
+    fig.suptitle(f&quot;Newton–Raphson  ·  point ({x0}, {y0})  ·  initial guess x = 0&quot;,
+                 x=0.01, ha=&quot;left&quot;, fontsize=13.5, fontweight=&quot;bold&quot;, color=INK, y=1.03)
+    fig.tight_layout()
+    save(fig, f&quot;p1_newton_{x0}_{y0}.png&quot;)
+
+
+def plot_golden_steps(x0, y0, f, history, x_exact, bracket):
+    &quot;&quot;&quot;Three panels of the golden section intermediate steps for one point.
+
+    (a) the probe pairs on D(x)
+    (b) the bracket ladder: [a, b] for the first iterations
+    (c) bracket width and midpoint error, both decaying by 0.618 per step
+    &quot;&quot;&quot;
+    D = lambda x: dist_sq(x, x0, y0, f)
+    nshow = 12
+    cols = [ITER_CMAP(i / (nshow - 1)) for i in range(nshow)]
+
+    fig, axs = plt.subplots(1, 3, figsize=(15, 4.6),
+                            gridspec_kw=dict(width_ratios=[1.2, 1.1, 0.9]))
+
+    # ---- (a) D(x) with the first probe pairs -------------------------------
+    ax = axs[0]
+    xx = np.linspace(*bracket, 600)
+    ax.plot(xx, D(xx), color=VIOLET, lw=2.3, label=&quot;D(x) = (x − x₀)² + (x² + 5 − y₀)²&quot;)
+    ax.set_yscale(&quot;log&quot;)
+    for i, h in enumerate(history[:6]):
+        ax.scatter([h[&quot;x1&quot;], h[&quot;x2&quot;]], [h[&quot;D1&quot;], h[&quot;D2&quot;]], s=40, color=cols[i * 2],
+                   zorder=5, edgecolor=SURFACE)
+    ax.scatter([x_exact], [D(x_exact)], s=80, color=AQUA, edgecolor=SURFACE, linewidth=2,
+               zorder=6, label=f&quot;minimum  x* = {x_exact:+.4f}&quot;)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;D(x)  (log scale)&quot;)
+    ax.set_title(&quot;(a) Probe points x₁, x₂ on D(x)&quot;)
+    ax.legend(loc=&quot;upper center&quot;, fontsize=8.8)
+
+    # ---- (b) the shrinking bracket ----------------------------------------
+    ax = axs[1]
+    for i, h in enumerate(history[:nshow]):
+        ax.plot([h[&quot;a&quot;], h[&quot;b&quot;]], [i, i], color=cols[i], lw=5, solid_capstyle=&quot;round&quot;)
+        ax.scatter([h[&quot;x1&quot;], h[&quot;x2&quot;]], [i, i], s=18, color=&quot;white&quot;, edgecolor=INK2,
+                   zorder=5, linewidth=1)
+    ax.axvline(x_exact, color=AQUA, lw=1.6, ls=&quot;--&quot;)
+    ax.invert_yaxis()
+    ax.set_yticks(range(nshow))
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;iteration k&quot;)
+    ax.set_title(&quot;(b) Bracket [a, b] shrinks by 1/φ&quot;)
+    ax.grid(axis=&quot;y&quot;, visible=False)
+
+    # ---- (c) width and error ----------------------------------------------
+    ax = axs[2]
+    k = [h[&quot;k&quot;] for h in history]
+    width = [h[&quot;b&quot;] - h[&quot;a&quot;] for h in history]
+    err = [max(abs((h[&quot;a&quot;] + h[&quot;b&quot;]) / 2 - x_exact), 1e-17) for h in history]
+    ax.semilogy(k, width, color=BLUE, lw=2, label=&quot;bracket width b − a&quot;)
+    ax.semilogy(k, err, color=ORANGE, lw=2, label=&quot;|midpoint − x*|&quot;)
+    ax.axhline(1e-7, color=MUTED, lw=1, ls=&quot;:&quot;)
+    ax.text(k[-1] * 0.55, 1.6e-7, &quot;tolerance 1e-7&quot;, ha=&quot;right&quot;, fontsize=8.5, color=INK2)
+    ax.set_xlabel(&quot;iteration k&quot;)
+    ax.set_title(&quot;(c) Linear convergence (ratio 0.618)&quot;)
+    ax.legend(fontsize=8.8, loc=&quot;lower left&quot;)
+
+    fig.suptitle(f&quot;Golden Section Search  ·  point ({x0}, {y0})  ·  bracket [−10, 10]&quot;,
+                 x=0.01, ha=&quot;left&quot;, fontsize=13.5, fontweight=&quot;bold&quot;, color=INK, y=1.03)
+    fig.tight_layout()
+    save(fig, f&quot;p1_golden_{x0}_{y0}.png&quot;)
+
+
+def plot_convergence_comparison(points, results, name=&quot;p1_convergence.png&quot;):
+    &quot;&quot;&quot;Error per iteration for both methods and all five points, side by side.&quot;&quot;&quot;
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4.2), sharey=True)
+    for j, ((x0, y0), r) in enumerate(zip(points, results)):
+        x_exact = r[&quot;analytical&quot;][1]
+        col = [BLUE, ORANGE, AQUA, VIOLET, RED][j]
+        label = f&quot;({x0}, {y0})&quot;
+
+        xs_newton = [h[&quot;x&quot;] for h in r[&quot;newton_history&quot;]] + [r[&quot;newton&quot;][1]]
+        axs[0].semilogy(range(len(xs_newton)),
+                        [max(abs(v - x_exact), 1e-16) for v in xs_newton],
+                        color=col, marker=&quot;o&quot;, ms=5, mec=SURFACE, label=label)
+
+        # (0,0) is skipped on the right: its bracket is symmetric about x* = 0,
+        # so the midpoint hits the exact answer every other step and the error
+        # drops to 0, which cannot be drawn on a log axis.
+        if (x0, y0) == (0, 0):
+            continue
+        hg = r[&quot;golden_history&quot;]
+        axs[1].semilogy([h[&quot;k&quot;] for h in hg],
+                        [max(abs((h[&quot;a&quot;] + h[&quot;b&quot;]) / 2 - x_exact), 1e-12) for h in hg],
+                        color=col, lw=1.8, label=label)
+
+    axs[0].set_title(&quot;Newton–Raphson: error per iteration&quot;)
+    axs[1].set_title(&quot;Golden section: error per iteration&quot;)
+    for ax in axs:
+        ax.set_xlabel(&quot;iteration k&quot;)
+    axs[0].set_ylabel(&quot;|x_k − x*|&quot;)
+    axs[0].legend(title=&quot;point&quot;, fontsize=9, title_fontsize=9)
+    axs[1].text(0.98, 0.97, &quot;(0, 0) omitted: its midpoint equals x* = 0\n&quot;
+                            &quot;exactly on every other step (error = 0)&quot;,
+                transform=axs[1].transAxes, ha=&quot;right&quot;, va=&quot;top&quot;, fontsize=8.5, color=INK2)
+    fig.tight_layout()
+    save(fig, name)
+
+
+# =============================================================================
+# Section 7.  Demonstrations
+# =============================================================================
+ASSIGNED_POINTS = [(0, 0), (-4, 0), (-8, 0), (2, 0), (6, 0)]
+BRACKET = (-10.0, 10.0)          # starting bracket for golden section search
+
+
+def assigned_points_demo():
+    &quot;&quot;&quot;Part 1 as assigned: the five points and the parabola y = x^2 + 5.
+
+    Runs all three methods, prints the comparison table and draws the overview,
+    the per-point intermediate-step figures and the convergence comparison.
+    &quot;&quot;&quot;
+    a, b, c = 1.0, 0.0, 5.0
+    f, df, ddf = parabola(a, b, c)
+
+    print(&quot;\n&quot; + &quot;=&quot; * 78)
+    print(&quot;PART 1  ---  y = x^2 + 5&quot;)
+    print(&quot;=&quot; * 78)
+    print(f&quot;{&#39;point&#39;:&gt;9} | {&#39;x* (exact)&#39;:&gt;12} {&#39;d (exact)&#39;:&gt;11} | &quot;
+          f&quot;{&#39;d (Newton)&#39;:&gt;11} {&#39;it&#39;:&gt;3} | {&#39;d (golden)&#39;:&gt;11} {&#39;it&#39;:&gt;3}&quot;)
+    print(&quot;-&quot; * 78)
+
+    results = []
+    for (x0, y0) in ASSIGNED_POINTS:
+        da, xa, roots = analytical_parabola(x0, y0, a, b, c)
+        dn, xn, hn = newton_distance(x0, y0, f, df, ddf, initial_guess=0.0)
+        dg, xg, hg = golden_section(x0, y0, f, *BRACKET)
+        results.append(dict(point=(x0, y0), analytical=(da, xa), roots=roots,
+                            newton=(dn, xn), newton_history=hn,
+                            golden=(dg, xg), golden_history=hg))
+        print(f&quot;{str((x0, y0)):&gt;9} | {xa:12.6f} {da:11.6f} | &quot;
+              f&quot;{dn:11.6f} {len(hn):3d} | {dg:11.6f} {len(hg) - 1:3d}&quot;)
+
+    # Per-point iterate tables, i.e. the intermediate steps in numbers.
+    print(&quot;\nNewton iterates (initial guess x = 0):&quot;)
+    for r in results:
+        xs = [h[&quot;x&quot;] for h in r[&quot;newton_history&quot;]] + [r[&quot;newton&quot;][1]]
+        print(f&quot;  {str(r[&#39;point&#39;]):&gt;9}: &quot; + &quot;  &quot;.join(f&quot;{v:+.7f}&quot; for v in xs))
+
+    print(&quot;\nGolden section, first four brackets:&quot;)
+    for r in results:
+        print(f&quot;  {str(r[&#39;point&#39;]):&gt;9}: &quot; +
+              &quot;  &quot;.join(f&quot;[{h[&#39;a&#39;]:+.4f}, {h[&#39;b&#39;]:+.4f}]&quot; for h in r[&quot;golden_history&quot;][:4]))
+
+    # Figures.
+    plot_overview(ASSIGNED_POINTS, f, results)
+    for r in results:
+        x0, y0 = r[&quot;point&quot;]
+        plot_newton_steps(x0, y0, f, df, ddf, r[&quot;newton_history&quot;],
+                          r[&quot;analytical&quot;][1], r[&quot;newton&quot;][1], r[&quot;newton&quot;][0])
+        plot_golden_steps(x0, y0, f, r[&quot;golden_history&quot;], r[&quot;analytical&quot;][1], BRACKET)
+    plot_convergence_comparison(ASSIGNED_POINTS, results)
+    return results
+
+
+# Other curves: two more parabolas plus the non-polynomial cases required by the
+# assignment (exponential, logarithmic, variable in the denominator, radical).
+OTHER_CURVES = [
+    dict(name=&quot;y = 0.5x² − 2x + 1&quot;, kind=&quot;parabola&quot;,
+         f=lambda x: 0.5 * x ** 2 - 2 * x + 1, abc=(0.5, -2, 1), pt=(5, -2),
+         bracket=(-10, 10), domain=None, xr=(-1, 7)),
+    dict(name=&quot;y = −x² + 4x − 1&quot;, kind=&quot;parabola&quot;,
+         f=lambda x: -x ** 2 + 4 * x - 1, abc=(-1, 4, -1), pt=(-1, 4),
+         bracket=(-10, 10), domain=None, xr=(-2.5, 4.5)),
+    dict(name=&quot;y = eˣ&quot;, kind=&quot;exponential&quot;,
+         f=np.exp, pt=(2, 1), bracket=(-5, 3), domain=None, xr=(-2.5, 3)),
+    dict(name=&quot;y = ln x&quot;, kind=&quot;logarithmic&quot;,
+         f=np.log, pt=(0, 1), bracket=(1e-3, 6), domain=(1e-6, 1e6), xr=(0.02, 5)),
+    dict(name=&quot;y = √x&quot;, kind=&quot;radical&quot;,
+         f=np.sqrt, pt=(4, 0), bracket=(0, 10), domain=(1e-9, 1e6), xr=(0, 6)),
+    dict(name=&quot;y = 1/x&quot;, kind=&quot;rational (x in denominator)&quot;,
+         f=lambda x: 1 / x, pt=(0, 0), bracket=(0.05, 8), domain=(1e-3, 1e6), xr=(0.15, 4)),
+    dict(name=&quot;y = 4/(1 + x²)&quot;, kind=&quot;rational (x in denominator)&quot;,
+         f=lambda x: 4 / (1 + x ** 2), pt=(3, 3), bracket=(-2, 8), domain=None, xr=(-3, 5)),
+    dict(name=&quot;y = x^(1/3)&quot;, kind=&quot;cube root&quot;,
+         f=np.cbrt, pt=(-1, 2), bracket=(-6, 6), domain=None, xr=(-4, 3)),
+]
+
+
+def other_curves_demo():
+    &quot;&quot;&quot;The same two solvers on other parabolas and on non-polynomial curves.
+
+    Each answer is checked against a brute-force grid search, and the parabolas
+    are additionally checked against the exact cubic.  Two 2x2 figures are drawn
+    (upright, so the labels stay readable).
+    &quot;&quot;&quot;
+    print(&quot;\n&quot; + &quot;=&quot; * 78)
+    print(&quot;PART 1  ---  other curves and other points&quot;)
+    print(&quot;=&quot; * 78)
+    print(f&quot;{&#39;function&#39;:&gt;18} {&#39;point&#39;:&gt;9} | {&#39;x* (Newton)&#39;:&gt;12} {&#39;d (Newton)&#39;:&gt;11} {&#39;it&#39;:&gt;3} | &quot;
+          f&quot;{&#39;d (golden)&#39;:&gt;11} | {&#39;d (grid)&#39;:&gt;10} | {&#39;d (exact)&#39;:&gt;10}&quot;)
+    print(&quot;-&quot; * 100)
+
+    figA, axsA = plt.subplots(2, 2, figsize=(10, 9))
+    figB, axsB = plt.subplots(2, 2, figsize=(10, 9))
+    axes = list(axsA.ravel()) + list(axsB.ravel())
+
+    rows = []
+    for g, ax in zip(OTHER_CURVES, axes):
+        f = g[&quot;f&quot;]
+        x0, y0 = g[&quot;pt&quot;]
+        r = distance_to_curve(x0, y0, f, g[&quot;bracket&quot;], domain=g[&quot;domain&quot;])
+        dn, xn, it = r[&quot;newton&quot;]
+
+        exact = &quot;---&quot;
+        if g[&quot;kind&quot;] == &quot;parabola&quot;:
+            da, _, _ = analytical_parabola(x0, y0, *g[&quot;abc&quot;])
+            exact = f&quot;{da:10.6f}&quot;
+        print(f&quot;{g[&#39;name&#39;]:&gt;18} {str(g[&#39;pt&#39;]):&gt;9} | {xn:12.6f} {dn:11.6f} {it:3d} | &quot;
+              f&quot;{r[&#39;golden&#39;][0]:11.6f} | {r[&#39;grid&#39;][0]:10.6f} | {exact:&gt;10}&quot;)
+        rows.append(dict(name=g[&quot;name&quot;], kind=g[&quot;kind&quot;], point=[x0, y0], **r))
+
+        # ---- one panel per curve: the curve, the Newton iterates, the segment
+        xx = np.linspace(*g[&quot;xr&quot;], 500)
+        ax.plot(xx, f(xx), color=BLUE, lw=2.4)
+        iterates = [h[&quot;x&quot;] for h in r[&quot;newton_history&quot;]] + [xn]
+        for i, xi in enumerate(iterates):
+            ax.scatter([xi], [f(xi)], s=26, color=ITER_CMAP(i / max(len(iterates) - 1, 1)),
+                       zorder=5, edgecolor=SURFACE, linewidth=0.8)
+        draw_shortest_segment(ax, x0, y0, xn, f)
+        draw_query_point(ax, x0, y0)
+
+        xa_, xb_ = min(g[&quot;xr&quot;][0], x0 - 0.5), max(g[&quot;xr&quot;][1], x0 + 0.5)
+        yv = np.concatenate([f(xx), [y0]])
+        ax.set_xlim(xa_, xb_); ax.set_ylim(yv.min() - 0.6, yv.max() + 0.6)
+        ax.set_aspect(&quot;equal&quot;, adjustable=&quot;datalim&quot;)
+        ax.set_title(g[&quot;name&quot;], fontsize=12.5)
+        right = g[&quot;name&quot;] in (&quot;y = ln x&quot;, &quot;y = −x² + 4x − 1&quot;)
+        ax.text(0.97 if right else 0.03, 0.04,
+                f&quot;point ({x0}, {y0})\nd = {dn:.5f}\nx* = {xn:.5f}&quot;,
+                ha=&quot;right&quot; if right else &quot;left&quot;, transform=ax.transAxes, fontsize=9.3,
+                color=INK, bbox=dict(boxstyle=&quot;round,pad=0.35&quot;, fc=&quot;white&quot;, ec=GRID))
+
+    for fg, nm, sub in ((figA, &quot;p1_gallery_a.png&quot;, &quot;other parabolas, exponential, logarithm&quot;),
+                        (figB, &quot;p1_gallery_b.png&quot;, &quot;radical, rational and cube-root functions&quot;)):
+        fg.suptitle(f&quot;Same code, {sub} — Newton iterates (light → dark) and the shortest segment&quot;,
+                    x=0.01, ha=&quot;left&quot;, fontsize=13, fontweight=&quot;bold&quot;, color=INK)
+        fg.tight_layout()
+        save(fg, nm)
+    return rows
+
+
+def multiple_minima_demo():
+    &quot;&quot;&quot;A case where D has several stationary points: the point (0, 8).
+
+    D&#39;(x) = 2x(2x^2 - 5) has roots 0 and +-sqrt(2.5).  x = 0 is a local *maximum*
+    of D, so Newton started at 0 stops on the wrong answer, while the analytical
+    solver enumerates all three roots and keeps the smallest D.  This is why
+    newton_multistart exists.
+    &quot;&quot;&quot;
+    x0, y0 = 0, 8
+    a, b, c = 1.0, 0.0, 5.0
+    f, df, ddf = parabola(a, b, c)
+    D = lambda x: dist_sq(x, x0, y0, f)
+
+    da, xa, roots = analytical_parabola(x0, y0, a, b, c)
+    starts = [-2.5, -0.4, 0.0, 0.4, 2.5]
+    runs = [newton_distance(x0, y0, f, df, ddf, initial_guess=s) for s in starts]
+    dg, xg, _ = golden_section(x0, y0, f, *BRACKET)
+
+    print(&quot;\n&quot; + &quot;=&quot; * 78)
+    print(&quot;PART 1  ---  several stationary points: the point (0, 8)&quot;)
+    print(&quot;=&quot; * 78)
+    print(&quot;  stationary points:&quot;, &quot;, &quot;.join(f&quot;{r:+.6f}&quot; for r in roots))
+    print(f&quot;  analytical: d = {da:.6f} at x* = {xa:+.6f}&quot;)
+    for s, (d, x, _) in zip(starts, runs):
+        flag = &quot;  &lt;-- local maximum, wrong answer&quot; if abs(x) &lt; 1e-9 else &quot;&quot;
+        print(f&quot;  Newton from x = {s:+.1f}: d = {d:.6f} at x* = {x:+.6f}{flag}&quot;)
+    print(f&quot;  golden section on [-10, 10]: d = {dg:.6f} at x* = {xg:+.6f}&quot;)
+
+    fig, axs = plt.subplots(1, 2, figsize=(12.5, 4.6))
+    ax = axs[0]
+    xx = np.linspace(-3.2, 3.2, 400)
+    ax.plot(xx, f(xx), color=BLUE, lw=2.5, label=&quot;y = x² + 5&quot;)
+    for rt in roots:
+        is_min = abs(D(rt) - da ** 2) &lt; 1e-9
+        ax.plot([x0, rt], [y0, f(rt)], color=ORANGE if is_min else MUTED,
+                lw=1.8, ls=(0, (4, 2)))
+        ax.scatter([rt], [f(rt)], s=60, color=AQUA if is_min else MUTED,
+                   edgecolor=SURFACE, linewidth=2, zorder=6)
+    draw_query_point(ax, x0, y0, &quot;(0, 8)&quot;, dx=0.2, dy=0.5)
+    ax.annotate(&quot;x = 0 is a critical point too\n(local MAX of D, d = 3)&quot;, (0, 5),
+                xytext=(0.5, 2.3), fontsize=9, color=INK2,
+                arrowprops=dict(arrowstyle=&quot;-&gt;&quot;, color=MUTED))
+    ax.set_aspect(&quot;equal&quot;); ax.set_ylim(1.5, 11)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;y&quot;)
+    ax.set_title(&quot;(a) Two equally close points&quot;)
+
+    ax = axs[1]
+    xx = np.linspace(-2.6, 2.6, 400)
+    ax.plot(xx, D(xx), color=VIOLET, lw=2.3, label=&quot;D(x) = x² + (x² − 3)²&quot;)
+    for s, (_, x, _) in zip(starts, runs):
+        ax.annotate(&quot;&quot;, xy=(x, D(x)), xytext=(s, D(s)),
+                    arrowprops=dict(arrowstyle=&quot;-&gt;&quot;, color=ORANGE, lw=1.4,
+                                    connectionstyle=&quot;arc3,rad=-0.3&quot;))
+        ax.scatter([s], [D(s)], s=30, color=ORANGE, zorder=5)
+    for rt in roots:
+        ax.scatter([rt], [D(rt)], s=70, color=AQUA if D(rt) &lt; 8 else RED,
+                   edgecolor=SURFACE, linewidth=2, zorder=6)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;D(x)&quot;)
+    ax.set_title(&quot;(b) Newton from 5 starting guesses&quot;)
+    ax.text(0, 10.2, &quot;x₀ = 0 → stuck at\nthe local max&quot;, ha=&quot;center&quot;, fontsize=9, color=INK2)
+    ax.legend(loc=&quot;upper center&quot;, fontsize=9, bbox_to_anchor=(0.5, 0.82))
+    fig.tight_layout()
+    save(fig, &quot;p1_multimin.png&quot;)
+
+    return dict(point=[x0, y0], roots=roots, d=da, x=xa,
+                newton=[dict(start=s, d=r[0], x=r[1]) for s, r in zip(starts, runs)],
+                golden=dict(d=dg, x=xg))
+
+
+def main():
+    assigned_points_demo()
+    other_curves_demo()
+    multiple_minima_demo()
+    print(&quot;\nAll Part 1 figures written to ../media/\n&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+</section>
+<section id="app:fitting" class="level1">
+<h1><code>fitting.py</code> — Part 2 code</h1>
+<pre><code class="language-python">&quot;&quot;&quot;
+SYDE 572 - Assignment 1, Part 2
+================================
+Least-squares fitting of a line  y = m x + b  and a parabola  y = a x^2 + b x + c
+to the points (0, 0.5), (2, 3.5), (1, 1.5), (3, 7.5), by minimising
+
+    MSE(theta) = (1/n) * sum_i ( g(x_i; theta) - y_i )^2 .
+
+Run this file to reproduce every Part 2 result:
+
+    python fitting.py
+
+It prints the parameter/MSE tables and writes the Part 2 figures to ../media/.
+
+Contents
+--------
+Section 1   The data, the design matrix, the MSE and its derivatives
+Section 2   Analytical solution: the normal equations
+Section 3   Numerical solution: Newton-Raphson, one parameter per step
+Section 4   Numerical solution: the full multivariate Newton step (comparison)
+Section 5   Plots of the intermediate steps
+Section 6   Tables and the demonstration run
+
+Both models are linear in their parameters, so writing them as
+y_hat = Phi @ theta lets one gradient and one Hessian serve both (and any
+polynomial degree).  numpy is used only for array arithmetic; the linear solve
+is a hand-written Gaussian elimination.
+&quot;&quot;&quot;
+
+import os
+
+import matplotlib
+matplotlib.use(&quot;Agg&quot;)                      # write PNG files, no interactive window
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.colors import LinearSegmentedColormap
+
+MEDIA = os.path.join(os.path.dirname(os.path.abspath(__file__)), &quot;..&quot;, &quot;media&quot;)
+
+# =============================================================================
+# Section 1.  Data, model, and the MSE
+# =============================================================================
+# The assigned data set (order is irrelevant to the fit).
+X = np.array([0.0, 2.0, 1.0, 3.0])
+Y = np.array([0.5, 3.5, 1.5, 7.5])
+
+
+def design(x, degree):
+    &quot;&quot;&quot;Design matrix Phi with columns x^degree, ..., x, 1.
+
+    degree 1 -&gt; [x, 1]       and theta = [m, b]      (the line)
+    degree 2 -&gt; [x^2, x, 1]  and theta = [a, b, c]   (the parabola)
+
+    With this, the model is simply y_hat = Phi @ theta for both fits.
+    &quot;&quot;&quot;
+    return np.vstack([x ** p for p in range(degree, -1, -1)]).T
+
+
+def mse(theta, x=X, y=Y):
+    &quot;&quot;&quot;Mean squared error of the model with parameters theta.&quot;&quot;&quot;
+    residuals = design(x, len(theta) - 1) @ theta - y
+    return float(np.mean(residuals ** 2))
+
+
+def gradient(theta, x=X, y=Y):
+    &quot;&quot;&quot;d(MSE)/d(theta) = (2/n) Phi^T (Phi theta - y).
+
+    For the line this is exactly the pair
+        dMSE/dm = (14m + 6b - 31)/2,   dMSE/db = (6m + 4b - 13)/2
+    obtained by hand from the sums of x_i, x_i^2, y_i, x_i y_i.
+    &quot;&quot;&quot;
+    P = design(x, len(theta) - 1)
+    return 2 / len(x) * P.T @ (P @ theta - y)
+
+
+def hessian(theta, x=X):
+    &quot;&quot;&quot;d^2(MSE)/d(theta)^2 = (2/n) Phi^T Phi.
+
+    It does not depend on theta, because the MSE is quadratic in the parameters.
+    The diagonal entries are the second derivatives used by the one-parameter
+    Newton steps; the off-diagonal entries are the cross terms that the
+    one-parameter scheme ignores (and the full Newton step uses).
+    &quot;&quot;&quot;
+    P = design(x, len(theta) - 1)
+    return 2 / len(x) * P.T @ P
+
+
+# =============================================================================
+# Section 2.  Analytical solution: the normal equations
+# =============================================================================
+def gauss_solve(A, r):
+    &quot;&quot;&quot;Solve A t = r by Gaussian elimination with partial pivoting.
+
+    Written out rather than calling numpy.linalg.solve, since the assignment
+    asks for the analytical procedure to be implemented.
+    &quot;&quot;&quot;
+    A = np.array(A, float)
+    r = np.array(r, float)
+    n = len(r)
+
+    # Forward elimination: pivot on the largest entry for numerical stability.
+    for i in range(n):
+        p = i + np.argmax(abs(A[i:, i]))
+        A[[i, p]], r[[i, p]] = A[[p, i]], r[[p, i]]
+        for j in range(i + 1, n):
+            factor = A[j, i] / A[i, i]
+            A[j, i:] -= factor * A[i, i:]
+            r[j] -= factor * r[i]
+
+    # Back substitution.
+    t = np.zeros(n)
+    for i in range(n - 1, -1, -1):
+        t[i] = (r[i] - A[i, i + 1:] @ t[i + 1:]) / A[i, i]
+    return t
+
+
+def normal_equations(degree, x=X, y=Y):
+    &quot;&quot;&quot;Analytical least-squares fit: solve (Phi^T Phi) theta = Phi^T y.
+
+    Setting every partial derivative of the MSE to zero gives exactly this
+    linear system - the 2x2 system for the line and the 3x3 system for the
+    parabola that are solved by hand in the write-up.
+    &quot;&quot;&quot;
+    P = design(x, degree)
+    return gauss_solve(P.T @ P, P.T @ y)
+
+
+# =============================================================================
+# Section 3.  Numerical solution: Newton-Raphson, one parameter per step
+# =============================================================================
+def coordinate_newton(theta0, x=X, y=Y, tolerance=1e-10, max_iter=500):
+    &quot;&quot;&quot;Optimise one parameter at a time, as the assignment specifies.
+
+    One outer iteration (&quot;sweep&quot;) runs, for each parameter j in turn:
+
+        theta_j &lt;- theta_j - (dMSE/dtheta_j) / (d^2 MSE/dtheta_j^2)
+
+    with every other parameter held at its latest value.  Because the MSE is
+    quadratic in each parameter separately, this 1-D Newton step is exact: it
+    lands on that parameter&#39;s minimiser given the others.  For the line the two
+    updates reduce to m &lt;- (31 - 6b)/14 and b &lt;- (13 - 6m)/4.
+
+    Convergence is only linear, because the coordinate directions ignore the
+    cross term in the Hessian (see full_newton for the contrast).
+
+    Returns (theta, history) where history records theta and the MSE after every
+    single sub-step, which is what the intermediate-step plots use.
+    &quot;&quot;&quot;
+    theta = np.array(theta0, float)
+    history = [dict(iter=0, step=&quot;start&quot;, theta=theta.copy(), mse=mse(theta, x, y))]
+
+    for it in range(1, max_iter + 1):
+        previous = theta.copy()
+        for j in range(len(theta)):
+            g = gradient(theta, x, y)[j]        # first derivative w.r.t. theta_j
+            h = hessian(theta, x)[j, j]         # second derivative w.r.t. theta_j
+            theta[j] -= g / h
+            history.append(dict(iter=it, step=j, theta=theta.copy(), mse=mse(theta, x, y)))
+        if np.max(abs(theta - previous)) &lt; tolerance:
+            break
+
+    return theta, history
+
+
+# =============================================================================
+# Section 4.  Numerical solution: the full multivariate Newton step
+# =============================================================================
+def full_newton(theta0, x=X, y=Y, tolerance=1e-12, max_iter=50):
+    &quot;&quot;&quot;Update all parameters together: theta &lt;- theta - H^{-1} grad.
+
+    For a quadratic MSE the Hessian is constant and this reaches the exact
+    minimum in a single step from any starting point.  Included to show what the
+    one-parameter-at-a-time scheme gives up.
+    &quot;&quot;&quot;
+    theta = np.array(theta0, float)
+    history = [dict(iter=0, theta=theta.copy(), mse=mse(theta, x, y))]
+
+    for it in range(1, max_iter + 1):
+        step = gauss_solve(hessian(theta, x), gradient(theta, x, y))
+        theta = theta - step
+        history.append(dict(iter=it, theta=theta.copy(), mse=mse(theta, x, y)))
+        if np.max(abs(step)) &lt; tolerance:
+            break
+
+    return theta, history
+
+
+# =============================================================================
+# Section 5.  Plots
+# =============================================================================
+INK, INK2, MUTED, GRID = &quot;#0b0b0b&quot;, &quot;#52514e&quot;, &quot;#8a8984&quot;, &quot;#e6e5e0&quot;
+BLUE, ORANGE, AQUA, VIOLET = &quot;#2a78d6&quot;, &quot;#eb6834&quot;, &quot;#1baf7a&quot;, &quot;#4a3aa7&quot;
+SURFACE = &quot;#fcfcfb&quot;
+ITER_CMAP = LinearSegmentedColormap.from_list(&quot;iter&quot;, [&quot;#b9d4f3&quot;, &quot;#2a78d6&quot;, &quot;#0f3c75&quot;])
+
+plt.rcParams.update({
+    &quot;figure.dpi&quot;: 110, &quot;savefig.dpi&quot;: 170,
+    &quot;figure.facecolor&quot;: SURFACE, &quot;axes.facecolor&quot;: SURFACE, &quot;savefig.facecolor&quot;: SURFACE,
+    &quot;font.family&quot;: &quot;DejaVu Sans&quot;, &quot;font.size&quot;: 10.5,
+    &quot;axes.edgecolor&quot;: MUTED, &quot;axes.labelcolor&quot;: INK2, &quot;axes.titlecolor&quot;: INK,
+    &quot;axes.titlesize&quot;: 12, &quot;axes.titleweight&quot;: &quot;bold&quot;, &quot;axes.titlelocation&quot;: &quot;left&quot;,
+    &quot;axes.titlepad&quot;: 10,
+    &quot;axes.spines.top&quot;: False, &quot;axes.spines.right&quot;: False,
+    &quot;axes.grid&quot;: True, &quot;grid.color&quot;: GRID, &quot;grid.linewidth&quot;: 0.8,
+    &quot;xtick.color&quot;: INK2, &quot;ytick.color&quot;: INK2, &quot;legend.frameon&quot;: False,
+    &quot;lines.linewidth&quot;: 2, &quot;mathtext.fontset&quot;: &quot;dejavusans&quot;,
+})
+
+
+def save(fig, name):
+    os.makedirs(MEDIA, exist_ok=True)
+    fig.savefig(os.path.join(MEDIA, name), bbox_inches=&quot;tight&quot;, pad_inches=0.15)
+    plt.close(fig)
+    print(&quot;  figure:&quot;, name)
+
+
+def plot_fits(line, parab, name=&quot;p2_fits.png&quot;):
+    &quot;&quot;&quot;The two fitted curves with their residuals, and a residual bar chart.&quot;&quot;&quot;
+    fig, axs = plt.subplots(1, 2, figsize=(13, 4.8), gridspec_kw=dict(width_ratios=[1.5, 1]))
+    xx = np.linspace(-0.3, 3.3, 300)
+
+    ax = axs[0]
+    ax.plot(xx, design(xx, 1) @ line, color=BLUE, lw=2.4,
+            label=f&quot;line  y = {line[0]:.2f}x {line[1]:+.2f}   (MSE = {mse(line):.4f})&quot;)
+    ax.plot(xx, design(xx, 2) @ parab, color=ORANGE, lw=2.4,
+            label=f&quot;parabola  y = {parab[0]:.2f}x² {parab[1]:+.2f}x {parab[2]:+.2f}&quot;
+                  f&quot;   (MSE = {mse(parab):.4f})&quot;)
+    # residual whiskers, one per data point and model
+    for xi, yi in zip(X, Y):
+        ax.plot([xi, xi], [yi, design(np.array([xi]), 1)[0] @ line], color=BLUE, lw=1, alpha=0.5)
+        ax.plot([xi + 0.03] * 2, [yi, design(np.array([xi]), 2)[0] @ parab],
+                color=ORANGE, lw=1, alpha=0.6)
+    ax.scatter(X, Y, s=85, color=INK, edgecolor=SURFACE, linewidth=2, zorder=6, label=&quot;data&quot;)
+    for xi, yi in zip(X, Y):
+        ax.annotate(f&quot;({xi:g}, {yi:g})&quot;, (xi, yi), xytext=(-12, 10),
+                    textcoords=&quot;offset points&quot;, fontsize=9.5, color=INK2, ha=&quot;right&quot;)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;y&quot;)
+    ax.set_title(&quot;Least-squares fits (thin lines = residuals)&quot;)
+    ax.legend(loc=&quot;upper left&quot;, fontsize=9.5)
+
+    ax = axs[1]
+    order = np.argsort(X)
+    w = 0.36
+    ax.bar(np.arange(4) - w / 2 - 0.01, (design(X, 1) @ line - Y)[order], w,
+           color=BLUE, label=&quot;line&quot;)
+    ax.bar(np.arange(4) + w / 2 + 0.01, (design(X, 2) @ parab - Y)[order], w,
+           color=ORANGE, label=&quot;parabola&quot;)
+    ax.axhline(0, color=INK2, lw=1)
+    ax.set_xticks(range(4), [f&quot;x = {v:g}&quot; for v in X[order]])
+    ax.set_ylabel(&quot;residual  ŷ − y&quot;)
+    ax.set_title(&quot;Residuals&quot;)
+    ax.legend(fontsize=9.5)
+
+    fig.tight_layout()
+    save(fig, name)
+
+
+def plot_line_path(line, coord_hist, full_hist, name=&quot;p2_line_path.png&quot;):
+    &quot;&quot;&quot;Intermediate steps for the line fit.
+
+    (a) contours of MSE(m, b) with the coordinate-wise path (axis-aligned
+        zig-zag, magnified in an inset) and the single full Newton step
+    (b) the fitted line after each sweep
+    &quot;&quot;&quot;
+    fig, axs = plt.subplots(1, 2, figsize=(13.5, 5.2))
+
+    # ---- (a) contour plot of the objective ---------------------------------
+    ax = axs[0]
+    mm, bb = np.meshgrid(np.linspace(-0.3, 3.3, 300), np.linspace(-2.2, 1.6, 300))
+    Z = np.mean((mm[..., None] * X + bb[..., None] - Y) ** 2, axis=-1)
+    cs = ax.contour(mm, bb, Z, levels=[0.6, 0.75, 1, 1.5, 2.5, 4, 6, 9, 13, 18, 25],
+                    cmap=LinearSegmentedColormap.from_list(&quot;c&quot;, [&quot;#9085e9&quot;, &quot;#d6d2f5&quot;]),
+                    linewidths=1)
+    ax.clabel(cs, fontsize=7.5, fmt=&quot;%g&quot;)
+
+    P = np.array([e[&quot;theta&quot;] for e in coord_hist[:1 + 2 * 15]])
+    ax.plot(P[:, 0], P[:, 1], color=ORANGE, lw=1.6, marker=&quot;o&quot;, ms=4.5, mec=SURFACE,
+            label=&quot;coordinate Newton (m-step, then b-step)&quot;)
+    ax.annotate(&quot;start (0, 0)&quot;, P[0], xytext=(6, 6), textcoords=&quot;offset points&quot;,
+                fontsize=9, color=INK)
+
+    # inset: the steps are tiny next to the full contour range
+    ins = ax.inset_axes([0.06, 0.40, 0.36, 0.36])
+    ins.contour(mm, bb, Z, levels=[0.576, 0.58, 0.585, 0.6, 0.65, 0.75],
+                colors=&quot;#b8b0f0&quot;, linewidths=0.8)
+    ins.plot(P[:, 0], P[:, 1], color=ORANGE, lw=1.3, marker=&quot;o&quot;, ms=3.5, mec=SURFACE)
+    for i, lab in ((1, &quot;m₁&quot;), (2, &quot;b₁&quot;), (3, &quot;m₂&quot;), (4, &quot;b₂&quot;)):
+        ins.annotate(lab, P[i], xytext=(4, 3), textcoords=&quot;offset points&quot;,
+                     fontsize=8.5, color=INK)
+    ins.scatter([line[0]], [line[1]], s=90, marker=&quot;*&quot;, color=AQUA, edgecolor=INK, zorder=7)
+    ins.set_xlim(2.18, 2.33); ins.set_ylim(-0.24, 0.03)
+    ins.set_title(&quot;zoom: axis-aligned m-step / b-step zig-zag&quot;, fontsize=8.5,
+                  fontweight=&quot;normal&quot;)
+    ins.tick_params(labelsize=7.5); ins.grid(False)
+    ax.indicate_inset_zoom(ins, edgecolor=MUTED)
+
+    F = np.array([e[&quot;theta&quot;] for e in full_hist])
+    ax.plot(F[:2, 0], F[:2, 1], color=BLUE, lw=1.6, ls=&quot;--&quot;, label=&quot;full Newton (one step)&quot;)
+    ax.scatter([line[0]], [line[1]], s=110, marker=&quot;*&quot;, color=AQUA, edgecolor=INK, zorder=7,
+               label=f&quot;optimum m = {line[0]:.2f}, b = {line[1]:.2f}&quot;)
+    ax.set_xlabel(&quot;slope m&quot;); ax.set_ylabel(&quot;intercept b&quot;)
+    ax.set_title(&quot;(a) MSE(m, b) contours and the optimisation path&quot;)
+    ax.legend(loc=&quot;lower left&quot;, fontsize=9)
+    ax.grid(False)
+
+    # ---- (b) the fitted line after each sweep ------------------------------
+    ax = axs[1]
+    xx = np.linspace(-0.3, 3.3, 100)
+    sweeps = [e for e in coord_hist if e[&quot;step&quot;] in (&quot;start&quot;, 1)][:7]
+    for i, e in enumerate(sweeps):
+        ax.plot(xx, design(xx, 1) @ e[&quot;theta&quot;], color=ITER_CMAP(i / (len(sweeps) - 1)), lw=1.8,
+                label=f&quot;sweep {e[&#39;iter&#39;]}: y = {e[&#39;theta&#39;][0]:.3f}x {e[&#39;theta&#39;][1]:+.3f}&quot;
+                      f&quot;  (MSE {e[&#39;mse&#39;]:.3f})&quot;)
+    ax.scatter(X, Y, s=70, color=INK, edgecolor=SURFACE, linewidth=2, zorder=6)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;y&quot;)
+    ax.set_title(&quot;(b) Intermediate lines after each sweep&quot;)
+    ax.legend(fontsize=8.3, loc=&quot;upper left&quot;)
+
+    fig.tight_layout()
+    save(fig, name)
+
+
+def plot_parabola_and_convergence(line, parab, line_hist, parab_hist,
+                                  line_full, parab_full, name=&quot;p2_convergence.png&quot;):
+    &quot;&quot;&quot;(a) the parabola after selected sweeps; (b) excess MSE per sweep, log scale.&quot;&quot;&quot;
+    fig, axs = plt.subplots(1, 2, figsize=(13.5, 5.0))
+    xx = np.linspace(-0.3, 3.3, 100)
+
+    ax = axs[0]
+    show = [0, 1, 2, 3, 5, 10, 30]
+    by_sweep = {e[&quot;iter&quot;]: e for e in parab_hist if e[&quot;step&quot;] in (&quot;start&quot;, 2)}
+    for i, s in enumerate(show):
+        e = by_sweep[s]
+        a_, b_, c_ = e[&quot;theta&quot;]
+        ax.plot(xx, design(xx, 2) @ e[&quot;theta&quot;], color=ITER_CMAP(i / (len(show) - 1)), lw=1.8,
+                label=f&quot;sweep {s}: {a_:.3f}x² {b_:+.3f}x {c_:+.3f}  (MSE {e[&#39;mse&#39;]:.4f})&quot;)
+    ax.plot(xx, design(xx, 2) @ parab, color=ORANGE, lw=2.4, ls=&quot;--&quot;, label=&quot;analytical optimum&quot;)
+    ax.scatter(X, Y, s=70, color=INK, edgecolor=SURFACE, linewidth=2, zorder=6)
+    ax.set_xlabel(&quot;x&quot;); ax.set_ylabel(&quot;y&quot;)
+    ax.set_title(&quot;(a) Parabola after each coordinate sweep&quot;)
+    ax.legend(fontsize=8, loc=&quot;upper left&quot;)
+
+    ax = axs[1]
+    # Excess MSE above the optimum; floored so the log axis stays readable once
+    # the iteration reaches floating-point noise.
+    lm = [e[&quot;mse&quot;] - mse(line) for e in line_hist if e[&quot;step&quot;] in (&quot;start&quot;, 1)]
+    pm = [e[&quot;mse&quot;] - mse(parab) for e in parab_hist if e[&quot;step&quot;] in (&quot;start&quot;, 2)]
+    ax.semilogy(range(len(lm)), np.maximum(lm, 1e-15), color=BLUE, lw=2,
+                label=&quot;line (2 parameters)&quot;)
+    ax.semilogy(range(len(pm)), np.maximum(pm, 1e-15), color=ORANGE, lw=2,
+                label=&quot;parabola (3 parameters)&quot;)
+    ax.scatter([1, 1], [max(line_full[1][&quot;mse&quot;] - mse(line), 1e-15),
+                        max(parab_full[1][&quot;mse&quot;] - mse(parab), 1e-15)],
+               marker=&quot;*&quot;, s=120, color=AQUA, edgecolor=INK, zorder=6,
+               label=&quot;full Newton after 1 step&quot;)
+    ax.set_xlim(-2, 150)
+    ax.set_xlabel(&quot;sweep (one Newton step per parameter)&quot;)
+    ax.set_ylabel(&quot;MSE − MSE*  (floored at 1e-15)&quot;)
+    ax.set_title(&quot;(b) Convergence of coordinate-wise Newton&quot;)
+    ax.legend(fontsize=9)
+
+    fig.tight_layout()
+    save(fig, name)
+
+
+# =============================================================================
+# Section 6.  Tables and the demonstration run
+# =============================================================================
+def print_sweep_table(history, names, nsweeps):
+    &quot;&quot;&quot;Print theta and the MSE after every sub-step of the first few sweeps.&quot;&quot;&quot;
+    header = &quot;  &quot;.join(f&quot;{n:&gt;10}&quot; for n in names)
+    print(f&quot;  {&#39;sweep&#39;:&gt;5} {&#39;updated&#39;:&gt;8}  {header}  {&#39;MSE&#39;:&gt;10}&quot;)
+    for e in history[:1 + len(names) * nsweeps]:
+        step = &quot;start&quot; if e[&quot;step&quot;] == &quot;start&quot; else names[e[&quot;step&quot;]]
+        vals = &quot;  &quot;.join(f&quot;{v:10.6f}&quot; for v in e[&quot;theta&quot;])
+        print(f&quot;  {e[&#39;iter&#39;]:5d} {step:&gt;8}  {vals}  {e[&#39;mse&#39;]:10.6f}&quot;)
+
+
+def main():
+    print(&quot;\n&quot; + &quot;=&quot; * 78)
+    print(&quot;PART 2  ---  fitting a line and a parabola by minimising the MSE&quot;)
+    print(&quot;=&quot; * 78)
+    print(&quot;  data:&quot;, &quot;, &quot;.join(f&quot;({x:g}, {y:g})&quot; for x, y in zip(X, Y)))
+
+    results = {}
+    for label, degree, names in ((&quot;line&quot;, 1, [&quot;m&quot;, &quot;b&quot;]),
+                                 (&quot;parabola&quot;, 2, [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;])):
+        analytic = normal_equations(degree)
+        coord, coord_hist = coordinate_newton(np.zeros(degree + 1))
+        full, full_hist = full_newton(np.zeros(degree + 1))
+
+        print(f&quot;\n{label.upper()}  ({&#39;, &#39;.join(names)})&quot;)
+        print(f&quot;  analytical (normal equations) : &quot;
+              f&quot;{&#39;, &#39;.join(f&#39;{n}={v:.6f}&#39; for n, v in zip(names, analytic))}   &quot;
+              f&quot;MSE = {mse(analytic):.6f}&quot;)
+        print(f&quot;  Newton, one parameter at a time: &quot;
+              f&quot;{&#39;, &#39;.join(f&#39;{n}={v:.6f}&#39; for n, v in zip(names, coord))}   &quot;
+              f&quot;MSE = {mse(coord):.6f}   ({coord_hist[-1][&#39;iter&#39;]} sweeps)&quot;)
+        print(f&quot;  Newton, full multivariate step : &quot;
+              f&quot;{&#39;, &#39;.join(f&#39;{n}={v:.6f}&#39; for n, v in zip(names, full))}   &quot;
+              f&quot;MSE = {mse(full):.6f}   (1 step)&quot;)
+
+        residuals = design(X, degree) @ analytic - Y
+        print(&quot;  residuals (y_hat - y):&quot;,
+              &quot;, &quot;.join(f&quot;x={x:g}: {r:+.4f}&quot; for x, r in zip(X, residuals)))
+        print(f&quot;\n  first sweeps of the one-parameter-at-a-time iteration:&quot;)
+        print_sweep_table(coord_hist, names, 6 if degree == 1 else 4)
+
+        results[label] = dict(analytic=analytic, coord=coord, coord_hist=coord_hist,
+                              full=full, full_hist=full_hist)
+
+    line, parab = results[&quot;line&quot;], results[&quot;parabola&quot;]
+    plot_fits(line[&quot;analytic&quot;], parab[&quot;analytic&quot;])
+    plot_line_path(line[&quot;analytic&quot;], line[&quot;coord_hist&quot;], line[&quot;full_hist&quot;])
+    plot_parabola_and_convergence(line[&quot;analytic&quot;], parab[&quot;analytic&quot;],
+                                  line[&quot;coord_hist&quot;], parab[&quot;coord_hist&quot;],
+                                  line[&quot;full_hist&quot;], parab[&quot;full_hist&quot;])
+
+    print(f&quot;\n  ANSWERS:  line     y = {line[&#39;analytic&#39;][0]:.2f}x {line[&#39;analytic&#39;][1]:+.2f}&quot;
+          f&quot;   MSE = {mse(line[&#39;analytic&#39;]):.4f}&quot;)
+    print(f&quot;            parabola y = {parab[&#39;analytic&#39;][0]:.2f}x² &quot;
+          f&quot;{parab[&#39;analytic&#39;][1]:+.2f}x {parab[&#39;analytic&#39;][2]:+.2f}&quot;
+          f&quot;   MSE = {mse(parab[&#39;analytic&#39;]):.4f}&quot;)
+    print(&quot;\nAll Part 2 figures written to ../media/\n&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+</section>
+<footer>SYDE 572 &middot; Assignment 1 &middot; generated from <code>solution.tex</code> with pandoc</footer>
+</main>
+</div>
+<script>addEventListener('DOMContentLoaded', () => {
+  if (window.hljs) document.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
+});</script>
+</body>
+</html>
