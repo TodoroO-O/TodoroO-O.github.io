@@ -99,9 +99,9 @@ footer { border-top:1px solid var(--line); margin-top:40px; padding:18px 0 0; co
 <li><a href="#results" id="toc-results">Results</a></li>
 <li><a href="#python-implementation-1" id="toc-python-implementation-1">Python implementation</a></li>
 </ul></li>
-<li><a href="#app:plots" id="toc-app:plots">Intermediate-step plots for the remaining points</a></li>
-<li><a href="#app:distance" id="toc-app:distance"><code>distance.py</code> — Part 1 code</a></li>
-<li><a href="#app:fitting" id="toc-app:fitting"><code>fitting.py</code> — Part 2 code</a></li>
+<li><a href="#intermediate-step-plots-for-the-remaining-points" id="toc-intermediate-step-plots-for-the-remaining-points">Intermediate-step plots for the remaining points</a></li>
+<li><a href="#distance.py-part-1-code" id="toc-distance.py-part-1-code"><code>distance.py</code> — Part 1 code</a></li>
+<li><a href="#fitting.py-part-2-code" id="toc-fitting.py-part-2-code"><code>fitting.py</code> — Part 2 code</a></li>
 </ul>
 </nav>
 <main>
@@ -127,7 +127,7 @@ distance, which is what every method below works with:
 <span class="math display">\[\begin{aligned}
   D(x)   &amp;= (x-x_0)^{2}+\bigl(f(x)-y_0\bigr)^{2},\\
   D&#39;(x)  &amp;= 2(x-x_0)+2\bigl(f(x)-y_0\bigr)f&#39;(x),
-  \label{eq:Dprime}\\
+  \quad(1)\\
   D&#39;&#39;(x) &amp;= 2+2f&#39;(x)^{2}+2\bigl(f(x)-y_0\bigr)f&#39;&#39;(x).
 \end{aligned}\]</span>
 Setting <span class="math inline">\(D&#39;(x)=0\)</span> gives
@@ -139,7 +139,7 @@ so the segment from the point to the curve is perpendicular to the tangent at th
 <span class="math display">\[D(x)=(x-x_0)^{2}+(x^{2}+5)^{2},\qquad
   D&#39;(x)=4x^{3}+22x-2x_0,\qquad
   D&#39;&#39;(x)=12x^{2}+22 .
-  \label{eq:ourD}\]</span>
+  \tag{2}\]</span>
 <span class="math inline">\(D&#39;&#39;(x)&gt;0\)</span> everywhere, so <span class="math inline">\(D\)</span> is strictly convex: one stationary point, and it is the global
 minimum. All three methods must therefore agree.</p>
 </section>
@@ -156,7 +156,7 @@ is positive for every <span class="math inline">\(x_0\)</span>. Exactly one real
   u=\sqrt[3]{\frac{x_0}{4}+\sqrt{\Delta}},\quad
   v=\sqrt[3]{\frac{x_0}{4}-\sqrt{\Delta}},\quad
   d=\sqrt{(x^{\ast}-x_0)^{2}+\bigl((x^{\ast})^{2}+5\bigr)^{2}} .
-  \label{eq:cardano}\]</span></p>
+  \tag{3}\]</span></p>
 <section id="worked-in-full-the-point--40." class="level4">
 <h4>Worked in full: the point <span class="math inline">\((-4,0)\)</span>.</h4>
 <p><span class="math display">\[\begin{aligned}
@@ -167,11 +167,11 @@ is positive for every <span class="math inline">\(x_0\)</span>. Exactly one real
   d&amp;=\sqrt{(-0.355470+4)^{2}+(5.126359)^{2}}=\sqrt{13.282599+26.279556}=\sqrt{39.562155}
    =\mathbf{6.289845}.
 \end{aligned}\]</span>
-Check in <span class="math inline">\(\eqref{eq:ourD}\)</span>: <span class="math inline">\(4(-0.355470)^{3}+22(-0.355470)+8=-0.179668-7.820340+8\approx0\)</span>.</p>
+Check in (2): <span class="math inline">\(4(-0.355470)^{3}+22(-0.355470)+8=-0.179668-7.820340+8\approx0\)</span>.</p>
 </section>
 <section id="all-five-points." class="level4">
 <h4>All five points.</h4>
-<p>Each row applies <span class="math inline">\(\eqref{eq:cardano}\)</span> in the same three steps.</p>
+<p>Each row applies (3) in the same three steps.</p>
 <div class="tbl"><table>
 <caption>Analytical solution for <span class="math inline">\(y=x^{2}+5\)</span>.</caption>
 <thead>
@@ -259,12 +259,12 @@ equally scaled, so the right angles are visible.</figcaption>
 <span class="math display">\[x_{k+1}=x_k-\frac{D&#39;(x_k)}{D&#39;&#39;(x_k)}
          =x_k-\frac{2(x_k-x_0)+2(f(x_k)-y_0)f&#39;(x_k)}
                    {2+2f&#39;(x_k)^{2}+2(f(x_k)-y_0)f&#39;&#39;(x_k)} ,
-  \label{eq:newton}\]</span>
+  \tag{4}\]</span>
 which for <span class="math inline">\(f(x)=x^{2}+5\)</span>, <span class="math inline">\(y_0=0\)</span> simplifies to
 <span class="math display">\[x_{k+1}=x_k-\frac{4x_k^{3}+22x_k-2x_0}{12x_k^{2}+22}
          =\frac{8x_k^{3}+2x_0}{12x_k^{2}+22}
          =\boxed{\;\frac{4x_k^{3}+x_0}{6x_k^{2}+11}\;}
-  \label{eq:newtonours}\]</span>
+  \tag{5}\]</span>
 Every run starts at <span class="math inline">\(x^{(0)}=0\)</span> with tolerance <span class="math inline">\(10^{-7}\)</span>, so the first step is always <span class="math inline">\(x_1=x_0/11\)</span>.</p>
 <section id="worked-in-full-the-point--40.-1" class="level4">
 <h4>Worked in full: the point <span class="math inline">\((-4,0)\)</span>.</h4>
@@ -279,7 +279,7 @@ Every run starts at <span class="math inline">\(x^{(0)}=0\)</span> with toleranc
 giving <span class="math inline">\(d=6.289845\)</span>. The number of correct digits roughly doubles per step (<span class="math inline">\(2\to5\to10\)</span>):
 quadratic convergence.</p>
 <div class="tbl"><table>
-<caption>Newton–Raphson for the point <span class="math inline">\((-4,0)\)</span>, all quantities from <span class="math inline">\(\eqref{eq:ourD}\)</span>.</caption>
+<caption>Newton–Raphson for the point <span class="math inline">\((-4,0)\)</span>, all quantities from (2).</caption>
 <thead>
 <tr>
 <th style="text-align: center;"><span class="math inline">\(k\)</span></th>
@@ -336,7 +336,11 @@ quadratic convergence.</p>
 <tbody>
 <tr>
 <td style="text-align: center;"></td>
-<td colspan="5" style="text-align: center;"><span class="math inline">\(x_k\)</span> for the query point <span class="math inline">\((x_0,y_0)\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(x_k\)</span> for the query point <span class="math inline">\((x_0,y_0)\)</span></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
 </tr>
 <tr>
 <td style="text-align: center;"><span class="math inline">\(k\)</span></td>
@@ -418,7 +422,7 @@ bracket needs one, so each iteration costs one new evaluation of <span class="ma
   \;\Longrightarrow\;
   n&gt;\frac{\ln(20/10^{-7})}{\ln 1.618034}=\frac{19.1138}{0.4812}=39.72
   \;\Longrightarrow\; n=40
-  \label{eq:goldeniters}\]</span>
+  \tag{6}\]</span>
 iterations for every point.</p>
 <section id="worked-in-full-the-point--40.-2" class="level4">
 <h4>Worked in full: the point <span class="math inline">\((-4,0)\)</span>.</h4>
@@ -431,21 +435,134 @@ iterations for every point.</p>
 Since <span class="math inline">\(114.47&lt;152.24\)</span>, <span class="math inline">\(b\leftarrow x_2\)</span> and the bracket becomes <span class="math inline">\([-10,\ 2.3607]\)</span>. The old <span class="math inline">\(x_1\)</span>
 becomes the new <span class="math inline">\(x_2\)</span>, so only <span class="math inline">\(x_1=-10+0.381966(12.3607)=-5.2786\)</span> is evaluated, with
 <span class="math inline">\(D=1081.68\)</span>. Continuing:</p>
-<div class="tabular">
-<p><span>crrrrrrcr</span>
-<span class="math inline">\(k\)</span> &amp; <span class="math inline">\(a\)</span> &amp; <span class="math inline">\(b\)</span> &amp; <span class="math inline">\(x_1\)</span> &amp; <span class="math inline">\(x_2\)</span> &amp; <span class="math inline">\(D(x_1)\)</span> &amp; <span class="math inline">\(D(x_2)\)</span> &amp; update &amp; <span class="math inline">\(b-a\)</span><br />
-&amp; <span class="math inline">\(-10.0000\)</span> &amp; <span class="math inline">\(10.0000\)</span> &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(114.4717\)</span> &amp; <span class="math inline">\(152.2425\)</span> &amp; <span class="math inline">\(b\leftarrow x_2\)</span> &amp; <span class="math inline">\(20.0000\)</span><br />
-1 &amp; <span class="math inline">\(-10.0000\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(-5.2786\)</span> &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(1081.6804\)</span> &amp; <span class="math inline">\(114.4717\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(12.3607\)</span><br />
-2 &amp; <span class="math inline">\(-5.2786\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(114.4717\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(7.6393\)</span><br />
-3 &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(2.3607\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(0.5573\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(48.9709\)</span> &amp; <span class="math inline">\(b\leftarrow x_2\)</span> &amp; <span class="math inline">\(4.7214\)</span><br />
-4 &amp; <span class="math inline">\(-2.3607\)</span> &amp; <span class="math inline">\(0.5573\)</span> &amp; <span class="math inline">\(-1.2461\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(50.5232\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(2.9180\)</span><br />
-5 &amp; <span class="math inline">\(-1.2461\)</span> &amp; <span class="math inline">\(0.5573\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(-0.1316\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(40.1382\)</span> &amp; <span class="math inline">\(b\leftarrow x_2\)</span> &amp; <span class="math inline">\(1.8034\)</span><br />
-6 &amp; <span class="math inline">\(-1.2461\)</span> &amp; <span class="math inline">\(-0.1316\)</span> &amp; <span class="math inline">\(-0.8204\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(42.2933\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(1.1146\)</span><br />
-7 &amp; <span class="math inline">\(-0.8204\)</span> &amp; <span class="math inline">\(-0.1316\)</span> &amp; <span class="math inline">\(-0.5573\)</span> &amp; <span class="math inline">\(-0.3947\)</span> &amp; <span class="math inline">\(40.0544\)</span> &amp; <span class="math inline">\(39.5803\)</span> &amp; <span class="math inline">\(a\leftarrow x_1\)</span> &amp; <span class="math inline">\(0.6888\)</span><br />
-<br />
-40 &amp; <span class="math inline">\(-0.3554697\)</span> &amp; <span class="math inline">\(-0.3554696\)</span> &amp; &amp; &amp; <span class="math inline">\(8.74\times 10^{-8}\)</span><br />
-</p>
-</div>
+<div class="tbl"><table>
+<caption>Golden section search for <span class="math inline">\((-4,0)\)</span> on the bracket <span class="math inline">\([-10,10]\)</span>.</caption>
+<thead>
+<tr>
+<th style="text-align: center;"><span class="math inline">\(k\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(a\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(b\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_1\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(x_2\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(D(x_1)\)</span></th>
+<th style="text-align: right;"><span class="math inline">\(D(x_2)\)</span></th>
+<th style="text-align: center;">update</th>
+<th style="text-align: right;"><span class="math inline">\(b-a\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">0</td>
+<td style="text-align: right;"><span class="math inline">\(-10.0000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(10.0000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(114.4717\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(152.2425\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b\leftarrow x_2\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(20.0000\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">1</td>
+<td style="text-align: right;"><span class="math inline">\(-10.0000\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-5.2786\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1081.6804\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(114.4717\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a\leftarrow x_1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(12.3607\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">2</td>
+<td style="text-align: right;"><span class="math inline">\(-5.2786\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(114.4717\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(40.0544\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a\leftarrow x_1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(7.6393\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">3</td>
+<td style="text-align: right;"><span class="math inline">\(-2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(40.0544\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(48.9709\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b\leftarrow x_2\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(4.7214\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">4</td>
+<td style="text-align: right;"><span class="math inline">\(-2.3607\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-1.2461\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(50.5232\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(40.0544\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a\leftarrow x_1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(2.9180\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">5</td>
+<td style="text-align: right;"><span class="math inline">\(-1.2461\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.1316\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(40.0544\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(40.1382\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(b\leftarrow x_2\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.8034\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">6</td>
+<td style="text-align: right;"><span class="math inline">\(-1.2461\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.1316\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.8204\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(42.2933\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(40.0544\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a\leftarrow x_1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(1.1146\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;">7</td>
+<td style="text-align: right;"><span class="math inline">\(-0.8204\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.1316\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.5573\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3947\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(40.0544\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(39.5803\)</span></td>
+<td style="text-align: center;"><span class="math inline">\(a\leftarrow x_1\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(0.6888\)</span></td>
+</tr>
+<tr>
+<td style="text-align: center;"><em><span class="math inline">\(\vdots\)</span> further iterations <span class="math inline">\(\vdots\)</span></em></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: right;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">40</td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554697\)</span></td>
+<td style="text-align: right;"><span class="math inline">\(-0.3554696\)</span></td>
+<td style="text-align: right;">stop: midpoint <span class="math inline">\(x^\ast=-0.3554697\)</span>, <span class="math inline">\(d=6.289845\)</span></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: right;"><span class="math inline">\(8.74\times 10^{-8}\)</span></td>
+</tr>
+</tbody>
+</table></div>
 <p>The first probes are always <span class="math inline">\(\mp2.3607\)</span>, so for the other points only <span class="math inline">\((x-x_0)^{2}\)</span> changes. The
 pair <span class="math inline">\(\bigl(D(-2.3607),\,D(2.3607)\bigr)\)</span> is <span class="math inline">\((117.36,\,117.36)\)</span> for <span class="math inline">\((0,0)\)</span>;
 <span class="math inline">\((143.59,\,219.13)\)</span> for <span class="math inline">\((-8,0)\)</span>; <span class="math inline">\((130.80,\,111.91)\)</span> for <span class="math inline">\((2,0)\)</span>; and <span class="math inline">\((181.69,\,125.03)\)</span> for
@@ -454,7 +571,7 @@ pair <span class="math inline">\(\bigl(D(-2.3607),\,D(2.3607)\bigr)\)</span> is 
 <img src="media/p1_golden_-4_0.png" />
 <figcaption>Golden section intermediate steps for <span class="math inline">\((-4,0)\)</span>. (a) Probe pairs on <span class="math inline">\(D(x)\)</span>. (b) The bracket
 for the first 12 iterations, white dots marking the probes. (c) Bracket width and midpoint error,
-both decaying by the factor <span class="math inline">\(0.618\)</span> of <span class="math inline">\(\eqref{eq:goldeniters}\)</span>.</figcaption>
+both decaying by the factor <span class="math inline">\(0.618\)</span> of (6).</figcaption>
 </figure>
 </section>
 </section>
@@ -465,9 +582,12 @@ both decaying by the factor <span class="math inline">\(0.618\)</span> of <span 
 <tbody>
 <tr>
 <td style="text-align: left;"></td>
-<td colspan="2" style="text-align: center;">Analytical</td>
-<td colspan="2" style="text-align: center;">Newton–Raphson</td>
-<td colspan="2" style="text-align: center;">Golden section</td>
+<td style="text-align: right;">Analytical</td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;">Newton–Raphson</td>
+<td style="text-align: center;"></td>
+<td style="text-align: right;">Golden section</td>
+<td style="text-align: center;"></td>
 <td style="text-align: right;"></td>
 </tr>
 <tr>
@@ -551,11 +671,11 @@ linearly, with slope <span class="math inline">\(\log_{10}0.618\)</span> per ite
 and any curve:</p>
 <ul>
 <li><p><code>analytical_parabola(x0, y0, a, b, c)</code> — for <span class="math inline">\(y=ax^{2}+bx+c\)</span>, condition
-<span class="math inline">\(\eqref{eq:Dprime}\)</span> expands to the cubic
+(1) expands to the cubic
 <span class="math display">\[2a^{2}x^{3}+3abx^{2}+\bigl(b^{2}+2a(c-y_0)+1\bigr)x+\bigl(b(c-y_0)-x_0\bigr)=0 ,
-    \label{eq:generalcubic}\]</span>
+    \tag{7}\]</span>
 solved by a hand-written Cardano solver; the real root with the smallest <span class="math inline">\(D\)</span> is returned.</p></li>
-<li><p><code>newton_distance(...)</code> — equation <span class="math inline">\(\eqref{eq:newton}\)</span>. If <code>df</code>/<code>ddf</code> are
+<li><p><code>newton_distance(...)</code> — equation (4). If <code>df</code>/<code>ddf</code> are
 omitted, central differences are used; <code>domain=(lo,hi)</code> clips iterates into the domain of
 <span class="math inline">\(f\)</span>. Every step is recorded, which is what the step plots draw.</p></li>
 <li><p><code>golden_section(...)</code> — the bracket method, recording every bracket.</p></li>
@@ -572,7 +692,7 @@ on any point and any parabola, or on any <span class="math inline">\(f\)</span> 
 <h2>Other parabolas and non-polynomial functions</h2>
 <p>The same routines were applied to two further parabolas and to exponential, logarithmic, radical,
 rational (variable in the denominator) and cube-root functions. Each result is checked against a
-brute-force search over 400,001 grid points, and the parabolas also against <span class="math inline">\(\eqref{eq:generalcubic}\)</span>.</p>
+brute-force search over 400,001 grid points, and the parabolas also against (7).</p>
 <div class="tbl"><table>
 <caption>Other curves and points. All methods agree; <span class="math inline">\(d\)</span> (grid) is the brute-force reference.</caption>
 <thead>
@@ -711,7 +831,7 @@ plots of the intermediate steps.</p>
 <p>With <span class="math inline">\(n=4\)</span> points,
 <span class="math display">\[\begin{aligned}
   \mathrm{MSE}_{\text{line}}(m,b)&amp;=\frac1n\sum_{i=1}^{n}\bigl(mx_i+b-y_i\bigr)^{2},
-  \label{eq:mseline}\\
+  \quad(8)\\
   \mathrm{MSE}_{\text{parab}}(a,b,c)&amp;=\frac1n\sum_{i=1}^{n}\bigl(ax_i^{2}+bx_i+c-y_i\bigr)^{2}.
 \end{aligned}\]</span>
 Both are quadratic in their parameters, so each has a unique minimiser. The required sums:</p>
@@ -776,14 +896,14 @@ Both are quadratic in their parameters, so each has a unique minimiser. The requ
 </tr>
 </tbody>
 </table></div>
-<p>Differentiating <span class="math inline">\(\eqref{eq:mseline}\)</span> and substituting the sums:
+<p>Differentiating (8) and substituting the sums:
 <span class="math display">\[\begin{aligned}
   \frac{\partial\mathrm{MSE}}{\partial m}&amp;=\frac2n\sum_i(mx_i+b-y_i)x_i=\tfrac12(14m+6b-31),
   &amp;\frac{\partial^{2}\mathrm{MSE}}{\partial m^{2}}&amp;=7,
-  \label{eq:gradm}\\
+  \quad(9)\\
   \frac{\partial\mathrm{MSE}}{\partial b}&amp;=\frac2n\sum_i(mx_i+b-y_i)=\tfrac12(6m+4b-13),
   &amp;\frac{\partial^{2}\mathrm{MSE}}{\partial b^{2}}&amp;=2,
-  \label{eq:gradb}
+  \quad(10)
 \end{aligned}\]</span>
 with cross term <span class="math inline">\(\partial^{2}\mathrm{MSE}/\partial m\,\partial b=3\)</span>. The parabola follows the same pattern
 with one more parameter.</p>
@@ -792,7 +912,7 @@ with one more parameter.</p>
 <h2>Analytical solution</h2>
 <section id="line." class="level4">
 <h4>Line.</h4>
-<p>Setting <span class="math inline">\(\eqref{eq:gradm}\)</span> and <span class="math inline">\(\eqref{eq:gradb}\)</span> to zero gives the normal equations
+<p>Setting (9) and (10) to zero gives the normal equations
 <span class="math display">\[\begin{bmatrix}14&amp;6\\6&amp;4\end{bmatrix}\begin{bmatrix}m\\b\end{bmatrix}
   =\begin{bmatrix}31\\13\end{bmatrix},
   \qquad \det=14(4)-6(6)=20,\]</span>
@@ -841,12 +961,12 @@ step on that parameter’s partial derivative:
 <span class="math display">\[\theta_j\leftarrow\theta_j-\frac{\partial\mathrm{MSE}/\partial\theta_j}
                                   {\partial^{2}\mathrm{MSE}/\partial\theta_j^{2}},
   \qquad j=1,2,\dots\ \text{cyclically}.
-  \label{eq:coord}\]</span>
-For the line, substituting <span class="math inline">\(\eqref{eq:gradm}\)</span> and <span class="math inline">\(\eqref{eq:gradb}\)</span>,
+  \tag{11}\]</span>
+For the line, substituting (9) and (10),
 <span class="math display">\[m\leftarrow m-\frac{\tfrac12(14m+6b-31)}{7}=\frac{31-6b}{14},
   \qquad
   b\leftarrow b-\frac{\tfrac12(6m+4b-13)}{2}=\frac{13-6m}{4},
-  \label{eq:coordline}\]</span>
+  \tag{12}\]</span>
 and for the parabola
 <span class="math display">\[a\leftarrow\frac{83-36b-14c}{98},\qquad
   b\leftarrow\frac{31-36a-6c}{14},\qquad
@@ -984,7 +1104,11 @@ quadratic, because the steps are restricted to the coordinate directions and ign
 <td style="text-align: right;"><span class="math inline">\(0.575111\)</span></td>
 </tr>
 <tr>
-<td colspan="5" style="text-align: center;"><em><span class="math inline">\(\vdots\)</span>converged after 48 sweeps to <span class="math inline">\(m=2.3000,\;b=-0.2000\)</span>, MSE <span class="math inline">\(=0.5750\)</span> <span class="math inline">\(\vdots\)</span></em></td>
+<td style="text-align: center;"><em><span class="math inline">\(\vdots\)</span>converged after 48 sweeps to <span class="math inline">\(m=2.3000,\;b=-0.2000\)</span>, MSE <span class="math inline">\(=0.5750\)</span> <span class="math inline">\(\vdots\)</span></em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
 </tr>
 </tbody>
 </table></div>
@@ -1106,7 +1230,12 @@ quadratic, because the steps are restricted to the coordinate directions and ign
 <td style="text-align: right;"><span class="math inline">\(0.015947\)</span></td>
 </tr>
 <tr>
-<td colspan="6" style="text-align: center;"><em><span class="math inline">\(\vdots\)</span>converged after 476 sweeps to <span class="math inline">\(a=0.7500,\;b=0.0500,\;c=0.5500\)</span>, MSE <span class="math inline">\(=0.0125\)</span> <span class="math inline">\(\vdots\)</span></em></td>
+<td style="text-align: center;"><em><span class="math inline">\(\vdots\)</span>converged after 476 sweeps to <span class="math inline">\(a=0.7500,\;b=0.0500,\;c=0.5500\)</span>, MSE <span class="math inline">\(=0.0125\)</span> <span class="math inline">\(\vdots\)</span></em></td>
+<td style="text-align: left;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
 </tr>
 </tbody>
 </table></div>
@@ -1206,11 +1335,11 @@ serve both models and any degree:
   \qquad
   H=\frac2n\Phi^{\mathsf{T}}\Phi .\]</span>
 The three solvers are <code>normal_equations</code> (analytical, via a hand-written Gaussian
-elimination), <code>coordinate_newton</code> (equation <span class="math inline">\(\eqref{eq:coord}\)</span>, which records every
+elimination), <code>coordinate_newton</code> (equation (11), which records every
 sub-step), and <code>full_newton</code> for comparison.</p>
 </section>
 </section>
-<section id="app:plots" class="level1">
+<section id="intermediate-step-plots-for-the-remaining-points" class="level1">
 <h1>Intermediate-step plots for the remaining points</h1>
 <figure>
 <p><img src="media/p1_newton_0_0.png" style="width:99.0%" alt="image" /><br />
@@ -1230,7 +1359,7 @@ the solution.</figcaption>
 <figcaption>Golden section search for <span class="math inline">\((2,0)\)</span> and <span class="math inline">\((6,0)\)</span>.</figcaption>
 </figure>
 </section>
-<section id="app:distance" class="level1">
+<section id="distance.py-part-1-code" class="level1">
 <h1><code>distance.py</code> — Part 1 code</h1>
 <pre><code class="language-python">&quot;&quot;&quot;
 SYDE 572 - Assignment 1, Part 1
@@ -2008,7 +2137,7 @@ if __name__ == &quot;__main__&quot;:
     main()
 </code></pre>
 </section>
-<section id="app:fitting" class="level1">
+<section id="fitting.py-part-2-code" class="level1">
 <h1><code>fitting.py</code> — Part 2 code</h1>
 <pre><code class="language-python">&quot;&quot;&quot;
 SYDE 572 - Assignment 1, Part 2
