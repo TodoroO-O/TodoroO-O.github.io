@@ -267,8 +267,8 @@ classifier.</p>
 <thead>
 <tr>
 <th style="text-align: left;">Document <span class="math inline">\(d\)</span></th>
-<th style="text-align: center;"><span class="math inline">\(P(d,\textsc{pos})\)</span></th>
-<th style="text-align: center;"><span class="math inline">\(P(d,\textsc{neg})\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(P(d,\text{pos})\)</span></th>
+<th style="text-align: center;"><span class="math inline">\(P(d,\text{neg})\)</span></th>
 <th style="text-align: center;"><code>classify_nb</code></th>
 </tr>
 </thead>
@@ -627,10 +627,10 @@ shaded band is the 95% CI for sentiment accuracy.</figcaption>
 </section>
 <section id="sec:features" class="level2">
 <h2>Most informative features</h2>
-<p>In NB, each occurrence of word <span class="math inline">\(w\)</span> shifts the log-odds <span class="math inline">\(\log\frac{P(\textsc{pos}\mid d)}{P(\textsc{neg}\mid
+<p>In NB, each occurrence of word <span class="math inline">\(w\)</span> shifts the log-odds <span class="math inline">\(\log\frac{P(\text{pos}\mid d)}{P(\text{neg}\mid
 d)}\)</span> by exactly
 <span class="math display">\[\begin{equation}
-  s(w) \;=\; \log P(w\mid\textsc{pos}) - \log P(w\mid\textsc{neg}),
+  s(w) \;=\; \log P(w\mid\text{pos}) - \log P(w\mid\text{neg}),
 \end{equation}\]</span>
 so I ranked words by <span class="math inline">\(s(w)\)</span>. <code>print_top_nb(k, model)</code> prints the <span class="math inline">\(k\)</span> words with the
 largest and smallest <span class="math inline">\(s(w)\)</span>. As the handout warns, a low <span class="math inline">\(\alpha\)</span> gives uninterpretable results.
